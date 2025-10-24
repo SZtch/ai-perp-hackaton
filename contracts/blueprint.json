@@ -1,0 +1,31 @@
+{
+  "name": "SuperAI Perp Contracts",
+  "version": "1.0.0",
+  "contracts": [
+    {
+      "name": "OracleRegistry",
+      "file": "src/oracle-registry.tact",
+      "description": "Manages oracle data and price feeds"
+    },
+    {
+      "name": "Vault",
+      "file": "src/vault.tact",
+      "description": "Handles user collateral deposits and withdrawals"
+    },
+    {
+      "name": "PerpEngine",
+      "file": "src/perp-engine.tact",
+      "description": "Core perpetual trading engine"
+    },
+    {
+      "name": "RiskManager",
+      "file": "src/risk-manager.tact",
+      "description": "AI-driven risk management and liquidation"
+    },
+    {
+      "name": "FundingManager",
+      "file": "src/funding-manager.tact",
+      "description": "Manages funding rates and payments"
+    }
+  ]
+}
