@@ -18,7 +18,7 @@ export default function Home() {
   if (!mounted) return null
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-900">
       {!wallet ? <WalletConnect /> : <TradingDashboard isMiniApp={isMiniApp} />}
     </main>
   )

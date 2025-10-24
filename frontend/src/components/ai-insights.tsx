@@ -48,7 +48,7 @@ export function AIInsights() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg p-6">
+      <div className="bg-linear-to-r from-blue-900 to-purple-900 rounded-lg p-6">
         <h3 className="text-lg font-bold text-white mb-4">AI Market Analysis</h3>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
