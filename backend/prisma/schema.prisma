@@ -1,0 +1,60 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  tonAddress String   @unique
+  createdAt  DateTime @default(now())
+}
+
+model TonProofNonce {
+  id        String    @id @default(cuid())
+  payload   String    @unique
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?
+}
+
+model OracleTick {
+  id         String   @id @default(cuid())
+  symbol     String   @default("TONUSDT") // <--- WAJIB untuk multi-symbol
+  price      Float
+  volatility Float
+  confidence Int
+  timestamp  DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([symbol, timestamp(sort: Desc)])
+}
+
+model Order {
+  id        String    @id @default(cuid())
+  userId    String
+  symbol    String // "TONUSDT"/"BTCUSDT"/"ETHUSDT"
+  side      String // BUY | SELL
+  type      String // MARKET | LIMIT
+  price     Float?
+  qty       Float
+  status    String    @default("open") // open | filled | cancelled
+  createdAt DateTime  @default(now())
+  filledAt  DateTime?
+
+  @@map("orders")
+}
+
+model Position {
+  id        String   @id @default(cuid())
+  userId    String
+  symbol    String
+  size      Float
+  entryPx   Float
+  createdAt DateTime @default(now())
+
+  @@unique([userId, symbol]) // dipakai di where: { userId_symbol: { ... } }
+  @@map("positions")
+}

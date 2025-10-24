@@ -1,0 +1,9 @@
+-- CreateTable
+CREATE TABLE "OracleTick" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "price" REAL NOT NULL,
+    "volatility" REAL NOT NULL,
+    "confidence" INTEGER NOT NULL,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

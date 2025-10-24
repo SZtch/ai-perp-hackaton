@@ -1,63 +1,72 @@
-import { Router, type Request, type Response } from "express"
+import { Router, type Request, type Response } from "express";
+import { prisma } from "../db";
+import { z } from "zod";
 
-const router = Router()
+const router = Router();
 
-// Submit oracle price data
+const reportSchema = z.object({
+  symbol: z.string().min(3).default("TONUSDT"),
+  price: z.number().positive(),
+  volatility: z.number().min(0),
+  confidence: z.number().int().min(0).max(100),
+  timestamp: z.number().int().optional(),
+});
+
 router.post("/report", async (req: Request, res: Response) => {
-  try {
-    const { price, volatility, confidence, timestamp } = req.body
+  const parsed = reportSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid body", issues: parsed.error.issues });
 
-    if (!price || !volatility || !confidence) {
-      return res.status(400).json({ error: "Missing required fields" })
-    }
+  const { symbol, price, volatility, confidence, timestamp } = parsed.data;
+  const tick = await prisma.oracleTick.create({
+    data: { symbol, price, volatility, confidence, timestamp: timestamp ? new Date(timestamp) : new Date() },
+  });
 
-    // Store in database
-    const oracleData = {
-      price,
-      volatility,
-      confidence,
-      timestamp: timestamp || Date.now(),
-      source: "pingo-depin",
-    }
+  res.json({
+    success: true,
+    data: {
+      symbol: tick.symbol,
+      price: tick.price,
+      volatility: tick.volatility,
+      confidence: tick.confidence,
+      timestamp: tick.timestamp.getTime(),
+    },
+  });
+});
 
-    // TODO: Save to database
-    console.log("[Oracle] Received price report:", oracleData)
-
-    res.json({ success: true, data: oracleData })
-  } catch (error) {
-    res.status(500).json({ error: (error as Error).message })
-  }
-})
-
-// Get latest price
 router.get("/price", async (req: Request, res: Response) => {
-  try {
-    // TODO: Fetch from database
-    const latestPrice = {
-      price: 50000,
-      volatility: 25,
-      confidence: 95,
-      timestamp: Date.now(),
-    }
+  const symbol = String(req.query.symbol || "TONUSDT").toUpperCase();
+  const latest = await prisma.oracleTick.findFirst({ where: { symbol }, orderBy: { timestamp: "desc" } });
+  if (!latest) return res.json({ symbol, price: 0, volatility: 0, confidence: 0, timestamp: Date.now() });
+  res.json({
+    symbol,
+    price: latest.price,
+    volatility: latest.volatility,
+    confidence: latest.confidence,
+    timestamp: latest.timestamp.getTime(),
+  });
+});
 
-    res.json(latestPrice)
-  } catch (error) {
-    res.status(500).json({ error: (error as Error).message })
-  }
-})
-
-// Get price history
 router.get("/history", async (req: Request, res: Response) => {
-  try {
-    const { limit = 100, offset = 0 } = req.query
+  const symbol = String(req.query.symbol || "TONUSDT").toUpperCase();
+  const limit = Math.min(Number(req.query.limit ?? 100), 500);
+  const offset = Number(req.query.offset ?? 0);
 
-    // TODO: Fetch from database with pagination
-    const history = []
+  const [rows, total] = await Promise.all([
+    prisma.oracleTick.findMany({ where: { symbol }, orderBy: { timestamp: "desc" }, skip: offset, take: limit }),
+    prisma.oracleTick.count({ where: { symbol } }),
+  ]);
 
-    res.json({ data: history, total: 0 })
-  } catch (error) {
-    res.status(500).json({ error: (error as Error).message })
-  }
-})
+  res.json({
+    symbol,
+    data: rows.map(r => ({
+      symbol: r.symbol,
+      price: r.price,
+      volatility: r.volatility,
+      confidence: r.confidence,
+      timestamp: r.timestamp.getTime(),
+    })),
+    total,
+  });
+});
 
-export default router
+export default router;
