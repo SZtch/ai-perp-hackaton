@@ -30,3 +30,8 @@ dist/
 .next/
 coverage/
 
+node_modules/
+.next/
+dist/
+build/
+.env
