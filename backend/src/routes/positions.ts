@@ -71,7 +71,10 @@ router.post("/:id/close", async (req: AuthedRequest, res: Response) => {
     }
 
     // Calculate final PnL at current price
-    const positionWithPnL = await positionCalculator.calculatePositionPnL(position);
+    const positionWithPnL = await positionCalculator.getPositionWithPnL(positionId);
+    if (!positionWithPnL) {
+      return res.status(500).json({ error: "Unable to calculate position PnL" });
+    }
     const realizedPnl = positionWithPnL.unrealizedPnl;
 
     // Close position
