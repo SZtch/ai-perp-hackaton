@@ -15,6 +15,9 @@ import { startGlobalPriceFeed } from "./services/priceFeed";
 
 const app = express();
 
+// Trust proxy - required for Railway/Heroku deployment (behind reverse proxy)
+app.set('trust proxy', 1);
+
 // CORS: whitelist dari .env (comma-separated) atau allow all (dev)
 const origins = process.env.ORIGIN?.split(",").map(s => s.trim()).filter(Boolean) ?? true;
 app.use(cors({ origin: origins }));
