@@ -32,6 +32,18 @@ model TonProofNonce {
   @@index([payload])
 }
 
+model TokenBlacklist {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  userId     String
+  reason     String?  // "user_logout" | "security" | etc
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime // When this blacklist entry can be deleted
+
+  @@index([token])
+  @@index([expiresAt])
+}
+
 // ============================================
 // WALLET & BALANCE
 // ============================================

@@ -1,8 +1,9 @@
 import { Router, type Request, type Response } from "express";
 import crypto from "crypto";
 import { prisma } from "../db";
-import { signJwt } from "../lib/jwt";
+import { signJwt, verifyJwt } from "../lib/jwt";
 import { z } from "zod";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
@@ -54,6 +55,40 @@ router.post("/ton-proof/verify", async (req: Request, res: Response) => {
 
     const token = signJwt({ userId: user.id, address });
     res.json({ ok: true, token, user: { id: user.id, address } });
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+// POST /auth/logout -> revoke token (add to blacklist)
+router.post("/logout", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const token = req.token;
+    if (!token) return res.status(400).json({ error: "no token found" });
+
+    // Decode JWT to get expiry time
+    const decoded = verifyJwt<{ userId: string; address: string; exp?: number }>(token);
+    if (!decoded) return res.status(401).json({ error: "invalid token" });
+
+    // Calculate expiry date (JWT exp is in seconds, Date needs milliseconds)
+    const expiresAt = decoded.exp
+      ? new Date(decoded.exp * 1000)
+      : new Date(Date.now() + 24 * 60 * 60 * 1000); // Default 24 hours if no exp
+
+    // Add token to blacklist
+    await prisma.tokenBlacklist.create({
+      data: {
+        token,
+        userId: decoded.userId,
+        reason: "user_logout",
+        expiresAt
+      }
+    });
+
+    res.json({
+      ok: true,
+      message: "Successfully logged out"
+    });
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
