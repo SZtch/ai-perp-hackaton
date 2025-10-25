@@ -51,12 +51,12 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
     });
 
     const totalRealizedPnl = transactions
-      .filter((t) => t.type === "REALIZED_PNL")
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: any) => t.type === "REALIZED_PNL")
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
 
     const totalFees = transactions
-      .filter((t) => t.type === "TRADE_FEE")
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .filter((t: any) => t.type === "TRADE_FEE")
+      .reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0);
 
     // 6. Get order statistics
     const allOrders = await prisma.order.findMany({
@@ -78,7 +78,7 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
     });
 
     const todayPnl =
-      todayTransactions.reduce((sum, t) => sum + t.amount, 0) +
+      todayTransactions.reduce((sum: number, t: any) => sum + t.amount, 0) +
       (openPositions.length > 0 ? totalUnrealizedPnl : 0);
 
     // 8. Calculate win rate from closed positions
@@ -89,7 +89,7 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
       },
     });
 
-    const winningTrades = closedPositions.filter((p) => p.realizedPnl > 0).length;
+    const winningTrades = closedPositions.filter((p: any) => p.realizedPnl > 0).length;
     const winRate =
       closedPositions.length > 0 ? (winningTrades / closedPositions.length) * 100 : 0;
 

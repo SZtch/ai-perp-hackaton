@@ -58,7 +58,7 @@ router.get("/history", async (req: Request, res: Response) => {
 
   res.json({
     symbol,
-    data: rows.map(r => ({
+    data: rows.map((r: any) => ({
       symbol: r.symbol,
       price: r.price,
       volatility: r.volatility,
