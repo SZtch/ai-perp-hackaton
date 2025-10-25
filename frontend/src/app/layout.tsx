@@ -1,5 +1,11 @@
 import { TonConnectProvider } from '@/providers/ton-connect-provider';
+import { AuthProvider } from '@/providers/auth-provider';
 import './globals.css';
+
+export const metadata = {
+  title: 'SuperAI Perp - AI-Powered Perpetual Futures on TON',
+  description: 'Trade BTC, ETH, and TON with leverage up to 20x on TON blockchain',
+};
 
 export default function RootLayout({
   children,
@@ -10,7 +16,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <TonConnectProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </TonConnectProvider>
       </body>
     </html>
