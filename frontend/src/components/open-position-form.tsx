@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { tradingService } from '@/services/trading.service';
+import { useToast } from '@/providers/toast-provider';
 
 interface OpenPositionFormProps {
   onSuccess: () => void;
@@ -9,6 +10,7 @@ interface OpenPositionFormProps {
 }
 
 export function OpenPositionForm({ onSuccess, availableBalance }: OpenPositionFormProps) {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     symbol: 'TONUSDT',
     side: 'BUY' as 'BUY' | 'SELL',
@@ -73,11 +75,13 @@ export function OpenPositionForm({ onSuccess, availableBalance }: OpenPositionFo
         leverage: 5,
       });
 
-      alert('Position opened successfully!');
+      toast.success(`${formData.side === 'BUY' ? 'LONG' : 'SHORT'} position opened successfully!`);
       onSuccess();
     } catch (err: any) {
       console.error('Error opening position:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to open position');
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to open position';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

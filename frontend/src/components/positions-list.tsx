@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Position, tradingService } from '@/services/trading.service';
+import { useToast } from '@/providers/toast-provider';
 
 interface PositionsListProps {
   positions: Position[];
@@ -11,6 +12,7 @@ interface PositionsListProps {
 
 export function PositionsList({ positions, loading, onClose }: PositionsListProps) {
   const [closingPositionId, setClosingPositionId] = useState<string | null>(null);
+  const toast = useToast();
 
   const handleClosePosition = async (positionId: string) => {
     if (!confirm('Are you sure you want to close this position?')) {
@@ -20,11 +22,11 @@ export function PositionsList({ positions, loading, onClose }: PositionsListProp
     try {
       setClosingPositionId(positionId);
       await tradingService.closePosition(positionId);
-      alert('Position closed successfully!');
+      toast.success('Position closed successfully!');
       onClose(); // Refresh positions
     } catch (error: any) {
       console.error('Error closing position:', error);
-      alert(error.response?.data?.error || 'Failed to close position');
+      toast.error(error.response?.data?.error || 'Failed to close position');
     } finally {
       setClosingPositionId(null);
     }

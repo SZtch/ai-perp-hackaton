@@ -1,5 +1,6 @@
 import { TonConnectProvider } from '@/providers/ton-connect-provider';
 import { AuthProvider } from '@/providers/auth-provider';
+import { ToastProvider } from '@/providers/toast-provider';
 import './globals.css';
 
 export const metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({
       <body>
         <TonConnectProvider>
           <AuthProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </AuthProvider>
         </TonConnectProvider>
       </body>

@@ -6,6 +6,8 @@ import { PositionsList } from './positions-list';
 import { OpenPositionForm } from './open-position-form';
 import { MarketStats } from './market-stats';
 import { PnLDisplay } from './pnl-display';
+import { WalletDeposit } from './wallet-deposit';
+import { WalletWithdraw } from './wallet-withdraw';
 import { portfolioService } from '@/services/portfolio.service';
 import { Position } from '@/services/trading.service';
 
@@ -143,113 +145,48 @@ export function TradingDashboard() {
           )}
 
           {activeTab === 'wallet' && portfolio?.wallet && (
-            <div className="bg-slate-800 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-white mb-4">Wallet Management</h2>
+            <div className="space-y-6">
+              {/* Balance Cards */}
+              <div className="bg-slate-800 rounded-lg p-6">
+                <h2 className="text-xl font-bold text-white mb-4">💰 Wallet Overview</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-slate-700/50 rounded-lg p-4">
+                    <p className="text-sm text-slate-400 mb-1">Balance</p>
+                    <p className="text-xl font-bold text-white">
+                      ${portfolio.wallet.balance.toFixed(2)}
+                    </p>
+                  </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-slate-700/50 rounded-lg p-4">
-                  <p className="text-sm text-slate-400 mb-1">Balance</p>
-                  <p className="text-xl font-bold text-white">
-                    ${portfolio.wallet.balance.toFixed(2)}
-                  </p>
-                </div>
+                  <div className="bg-slate-700/50 rounded-lg p-4">
+                    <p className="text-sm text-slate-400 mb-1">Locked</p>
+                    <p className="text-xl font-bold text-orange-400">
+                      ${portfolio.wallet.locked.toFixed(2)}
+                    </p>
+                  </div>
 
-                <div className="bg-slate-700/50 rounded-lg p-4">
-                  <p className="text-sm text-slate-400 mb-1">Locked</p>
-                  <p className="text-xl font-bold text-orange-400">
-                    ${portfolio.wallet.locked.toFixed(2)}
-                  </p>
-                </div>
+                  <div className="bg-slate-700/50 rounded-lg p-4">
+                    <p className="text-sm text-slate-400 mb-1">Available</p>
+                    <p className="text-xl font-bold text-green-400">
+                      ${portfolio.wallet.available.toFixed(2)}
+                    </p>
+                  </div>
 
-                <div className="bg-slate-700/50 rounded-lg p-4">
-                  <p className="text-sm text-slate-400 mb-1">Available</p>
-                  <p className="text-xl font-bold text-green-400">
-                    ${portfolio.wallet.available.toFixed(2)}
-                  </p>
-                </div>
-
-                <div className="bg-slate-700/50 rounded-lg p-4">
-                  <p className="text-sm text-slate-400 mb-1">Equity</p>
-                  <p className="text-xl font-bold text-blue-400">
-                    ${portfolio.wallet.equity.toFixed(2)}
-                  </p>
+                  <div className="bg-slate-700/50 rounded-lg p-4">
+                    <p className="text-sm text-slate-400 mb-1">Equity</p>
+                    <p className="text-xl font-bold text-blue-400">
+                      ${portfolio.wallet.equity.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
-                <p className="text-sm text-yellow-300">
-                  💡 <strong>Test Mode:</strong> Use test transactions for development.
-                  Real TON testnet integration coming soon!
-                </p>
-              </div>
-
+              {/* Deposit & Withdraw */}
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Deposit */}
-                <div className="bg-slate-700/30 rounded-lg p-4">
-                  <h3 className="font-bold text-white mb-3">💵 Deposit USDT</h3>
-                  <p className="text-sm text-slate-400 mb-3">
-                    Deposit using test transaction
-                  </p>
-                  <input
-                    type="number"
-                    placeholder="Amount (USDT)"
-                    className="w-full px-4 py-2 bg-slate-700 text-white rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="deposit-amount"
-                  />
-                  <button
-                    onClick={async () => {
-                      const amount = (document.getElementById('deposit-amount') as HTMLInputElement)?.value;
-                      if (!amount || parseFloat(amount) <= 0) {
-                        alert('Please enter a valid amount');
-                        return;
-                      }
-                      // TODO: Implement deposit with walletService
-                      alert(`Deposit ${amount} USDT - Feature coming soon!`);
-                    }}
-                    className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Deposit (Test Mode)
-                  </button>
-                </div>
-
-                {/* Withdraw */}
-                <div className="bg-slate-700/30 rounded-lg p-4">
-                  <h3 className="font-bold text-white mb-3">💸 Withdraw USDT</h3>
-                  <p className="text-sm text-slate-400 mb-3">
-                    Withdraw to TON address (Fee: 0.5 USDT)
-                  </p>
-                  <input
-                    type="number"
-                    placeholder="Amount (USDT)"
-                    className="w-full px-4 py-2 bg-slate-700 text-white rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    id="withdraw-amount"
-                  />
-                  <input
-                    type="text"
-                    placeholder="TON Address"
-                    className="w-full px-4 py-2 bg-slate-700 text-white rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    id="withdraw-address"
-                  />
-                  <button
-                    onClick={async () => {
-                      const amount = (document.getElementById('withdraw-amount') as HTMLInputElement)?.value;
-                      const address = (document.getElementById('withdraw-address') as HTMLInputElement)?.value;
-                      if (!amount || parseFloat(amount) <= 0) {
-                        alert('Please enter a valid amount');
-                        return;
-                      }
-                      if (!address) {
-                        alert('Please enter TON address');
-                        return;
-                      }
-                      // TODO: Implement withdraw with walletService
-                      alert(`Withdraw ${amount} USDT - Feature coming soon!`);
-                    }}
-                    className="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                  >
-                    Withdraw
-                  </button>
-                </div>
+                <WalletDeposit onSuccess={handleRefresh} />
+                <WalletWithdraw
+                  availableBalance={portfolio.wallet.available}
+                  onSuccess={handleRefresh}
+                />
               </div>
             </div>
           )}
