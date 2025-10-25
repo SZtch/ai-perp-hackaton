@@ -4,10 +4,10 @@ import cors from "cors";
 import oracle from "./routes/oracle";
 import authTon from "./routes/auth-ton";
 import pairs from "./routes/pairs";
-import ordersNew from "./routes/orders-new"; // Updated orders with leverage
+import orders from "./routes/orders"; // Orders with leverage & margin
 import positions from "./routes/positions";
-import wallet from "./routes/wallet"; // New wallet endpoints
-import portfolio from "./routes/portfolio"; // New portfolio endpoint
+import wallet from "./routes/wallet"; // Wallet management
+import portfolio from "./routes/portfolio"; // Portfolio overview
 
 import { requireAuth } from "./middleware/auth";
 import { authLimiter, orderLimiter } from "./middleware/limits";
@@ -51,7 +51,7 @@ app.use("/api/portfolio", requireAuth, portfolio);
 app.use("/api/pairs", requireAuth, pairs);
 
 // orders (with leverage & margin)
-app.use("/api/orders", orderLimiter, requireAuth, ordersNew);
+app.use("/api/orders", orderLimiter, requireAuth, orders);
 
 // positions
 app.use("/api/positions", requireAuth, positions);
