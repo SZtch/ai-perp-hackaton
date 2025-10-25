@@ -1,59 +1,78 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-
-interface MarketStats {
-  totalOpenInterest: number
-  totalVolume24h: number
-  averageFundingRate: number
-  activeTraders: number
-}
+import { useEffect, useState } from 'react';
+import { tradingService, PriceData } from '@/services/trading.service';
 
 export function MarketStats() {
-  const [stats, setStats] = useState<MarketStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [prices, setPrices] = useState<Record<string, PriceData>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchPrices = async () => {
       try {
-        const res = await fetch("/api/trading/stats")
-        const data = await res.json()
-        setStats(data)
+        const pricesData = await tradingService.getAllPrices();
+        setPrices(pricesData);
       } catch (error) {
-        console.error("Error fetching stats:", error)
+        console.error('Error fetching prices:', error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStats()
-    const interval = setInterval(fetchStats, 30000) // Refresh every 30s
+    fetchPrices();
+    // Refresh prices every 2 seconds for real-time updates
+    const interval = setInterval(fetchPrices, 2000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
-  if (loading || !stats) {
-    return <div className="text-slate-400">Loading market stats...</div>
+  if (loading) {
+    return (
+      <div className="bg-slate-800 rounded-lg p-4">
+        <div className="text-slate-400 text-center">Loading market prices...</div>
+      </div>
+    );
   }
 
+  const symbols = ['TONUSDT', 'BTCUSDT', 'ETHUSDT'];
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-slate-800 rounded-lg p-4">
-        <div className="text-slate-400 text-sm mb-1">Open Interest</div>
-        <div className="text-xl font-bold text-white">${(stats.totalOpenInterest / 1e6).toFixed(1)}M</div>
-      </div>
-      <div className="bg-slate-800 rounded-lg p-4">
-        <div className="text-slate-400 text-sm mb-1">24h Volume</div>
-        <div className="text-xl font-bold text-white">${(stats.totalVolume24h / 1e6).toFixed(1)}M</div>
-      </div>
-      <div className="bg-slate-800 rounded-lg p-4">
-        <div className="text-slate-400 text-sm mb-1">Funding Rate</div>
-        <div className="text-xl font-bold text-blue-400">{(stats.averageFundingRate * 100).toFixed(3)}%</div>
-      </div>
-      <div className="bg-slate-800 rounded-lg p-4">
-        <div className="text-slate-400 text-sm mb-1">Active Traders</div>
-        <div className="text-xl font-bold text-white">{stats.activeTraders}</div>
+    <div className="bg-slate-800 rounded-lg p-4">
+      <h3 className="text-slate-400 text-sm font-medium mb-3">📊 Live Market Prices</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {symbols.map((symbol) => {
+          const price = prices[symbol];
+          const baseAsset = symbol.replace('USDT', '');
+
+          if (!price) {
+            return (
+              <div key={symbol} className="bg-slate-700/50 rounded-lg p-3">
+                <div className="text-slate-400 text-sm mb-1">{baseAsset}/USDT</div>
+                <div className="text-slate-500">Loading...</div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={symbol} className="bg-slate-700/50 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-slate-300 font-medium">{baseAsset}/USDT</span>
+                <span className={`text-xs px-2 py-0.5 rounded ${
+                  price.confidence >= 90 ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                }`}>
+                  {price.confidence}%
+                </span>
+              </div>
+              <div className="text-xl font-bold text-white">
+                ${price.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-xs text-slate-500 mt-1">
+                Vol: {price.volatility.toFixed(2)}%
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
-  )
+  );
 }
