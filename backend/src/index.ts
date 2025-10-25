@@ -1,16 +1,15 @@
-import "dotenv/config"; // <-- tambah ini di paling atas
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import oracle from "./routes/oracle";
 import authTon from "./routes/auth-ton";
 import pairs from "./routes/pairs";
-import orders from "./routes/orders";
+import ordersNew from "./routes/orders-new"; // Updated orders with leverage
 import positions from "./routes/positions";
+import wallet from "./routes/wallet"; // New wallet endpoints
+import portfolio from "./routes/portfolio"; // New portfolio endpoint
 
 import { requireAuth } from "./middleware/auth";
-
-// OPTIONAL: aktifkan kalau kamu sudah buat file ini
-// (kalau belum ada, sementara comment 2 import di bawah)
 import { authLimiter, orderLimiter } from "./middleware/limits";
 import { startGlobalPriceFeed } from "./services/priceFeed";
 
@@ -21,30 +20,63 @@ const origins = process.env.ORIGIN?.split(",").map(s => s.trim()).filter(Boolean
 app.use(cors({ origin: origins }));
 app.use(express.json());
 
-// health
-app.get("/health", (_req, res) => res.json({ ok: true }));
+// ============================================
+// PUBLIC ROUTES
+// ============================================
+
+// health check
+app.get("/health", (_req, res) => res.json({
+  ok: true,
+  timestamp: new Date().toISOString(),
+  network: process.env.TON_NETWORK || "testnet"
+}));
 
 // auth (rate limited)
 app.use("/auth", authLimiter, authTon);
 
-// public oracle (GETs), report boleh public atau bisa kamu protect nanti
+// public oracle endpoints
 app.use("/api/oracle", oracle);
 
-// protected resources
+// ============================================
+// PROTECTED ROUTES (Require Authentication)
+// ============================================
+
+// wallet management
+app.use("/api/wallet", requireAuth, wallet);
+
+// portfolio overview
+app.use("/api/portfolio", requireAuth, portfolio);
+
+// trading pairs info
 app.use("/api/pairs", requireAuth, pairs);
-app.use("/api/orders", orderLimiter, requireAuth, orders);
+
+// orders (with leverage & margin)
+app.use("/api/orders", orderLimiter, requireAuth, ordersNew);
+
+// positions
 app.use("/api/positions", requireAuth, positions);
 
-// whoami
+// whoami - get current user info
 app.get("/me", requireAuth, (req, res) => {
-  res.json({ me: req.user });
+  res.json({
+    user: req.user,
+    network: process.env.TON_NETWORK || "testnet"
+  });
 });
+
+// ============================================
+// START SERVER
+// ============================================
 
 const port = Number(process.env.PORT || 4000);
 app.listen(port, () => {
-  console.log("api up on", port);
+  console.log("===========================================");
+  console.log(`🚀 SuperAI Perp Backend`);
+  console.log(`📡 Server running on port ${port}`);
+  console.log(`🌐 Network: ${process.env.TON_NETWORK || "testnet"}`);
+  console.log(`💰 Symbols: ${process.env.FEED_SYMBOLS || "TONUSDT,BTCUSDT,ETHUSDT"}`);
+  console.log("===========================================");
 
-  // start price feed global (TONUSDT,BTCUSDT,ETHUSDT, dll sesuai FEED_SYMBOLS)
-  // Set .env: PRICE_FEED=binance_ws  FEED_SYMBOLS=TONUSDT,BTCUSDT,ETHUSDT
+  // Start price feed monitoring
   startGlobalPriceFeed();
 });

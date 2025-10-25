@@ -7,10 +7,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
 model User {
   id         String   @id @default(cuid())
   tonAddress String   @unique
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  wallet       Wallet?
+  orders       Order[]
+  positions    Position[]
+  transactions Transaction[]
 }
 
 model TonProofNonce {
@@ -18,43 +28,135 @@ model TonProofNonce {
   payload   String    @unique
   createdAt DateTime  @default(now())
   usedAt    DateTime?
+
+  @@index([payload])
 }
+
+// ============================================
+// WALLET & BALANCE
+// ============================================
+
+model Wallet {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  usdtBalance  Float    @default(0)      // Available USDT balance
+  lockedMargin Float    @default(0)      // Margin locked in positions
+  totalDeposit Float    @default(0)      // Total deposited (lifetime)
+  totalWithdraw Float   @default(0)      // Total withdrawn (lifetime)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String
+  type          String   // DEPOSIT | WITHDRAW | TRADE_FEE | FUNDING | REALIZED_PNL | LIQUIDATION
+  amount        Float    // Positive for credit, negative for debit
+  balanceAfter  Float    // Balance after this transaction
+  relatedId     String?  // Order ID, Position ID, etc
+  txHash        String?  // TON blockchain tx hash (for deposit/withdraw)
+  fromAddress   String?  // Source address (for deposits)
+  toAddress     String?  // Destination address (for withdrawals)
+  status        String   @default("pending") // pending | confirmed | failed
+  metadata      String?  // JSON string for additional data
+  createdAt     DateTime @default(now())
+  confirmedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([type])
+  @@index([txHash])
+}
+
+// ============================================
+// ORACLE & PRICE FEEDS
+// ============================================
 
 model OracleTick {
   id         String   @id @default(cuid())
-  symbol     String   @default("TONUSDT") // <--- WAJIB untuk multi-symbol
+  symbol     String   // "TONUSDT" | "BTCUSDT" | "ETHUSDT"
   price      Float
-  volatility Float
-  confidence Int
+  volatility Float    @default(0)
+  confidence Int      @default(100)
   timestamp  DateTime @default(now())
   createdAt  DateTime @default(now())
 
   @@index([symbol, timestamp(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
 }
 
-model Order {
-  id        String    @id @default(cuid())
-  userId    String
-  symbol    String // "TONUSDT"/"BTCUSDT"/"ETHUSDT"
-  side      String // BUY | SELL
-  type      String // MARKET | LIMIT
-  price     Float?
-  qty       Float
-  status    String    @default("open") // open | filled | cancelled
-  createdAt DateTime  @default(now())
-  filledAt  DateTime?
+model TradingPair {
+  id              String   @id @default(cuid())
+  symbol          String   @unique // "TONUSDT"
+  baseAsset       String   // "TON"
+  quoteAsset      String   // "USDT"
+  minOrderSize    Float    @default(1)
+  maxOrderSize    Float    @default(1000000)
+  maxLeverage     Int      @default(20)
+  takerFee        Float    @default(0.001)  // 0.1%
+  makerFee        Float    @default(0.0005) // 0.05%
+  maintenanceMargin Float  @default(0.05)   // 5% - for liquidation
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
+  @@index([symbol])
+  @@index([isActive])
+}
+
+// ============================================
+// TRADING
+// ============================================
+
+model Order {
+  id         String    @id @default(cuid())
+  userId     String
+  symbol     String    // "TONUSDT" | "BTCUSDT" | "ETHUSDT"
+  side       String    // BUY | SELL
+  type       String    // MARKET | LIMIT
+  price      Float?    // Limit price (null for MARKET)
+  qty        Float     // Order size in quote currency (USDT)
+  leverage   Int       @default(1)     // 1x - 20x
+  status     String    @default("open") // open | filled | cancelled | rejected
+  fillPrice  Float?    // Actual fill price
+  fee        Float     @default(0)     // Trading fee paid
+  createdAt  DateTime  @default(now())
+  filledAt   DateTime?
+  cancelledAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([symbol, status])
+  @@index([status])
   @@map("orders")
 }
 
 model Position {
-  id        String   @id @default(cuid())
-  userId    String
-  symbol    String
-  size      Float
-  entryPx   Float
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  userId          String
+  symbol          String   // "TONUSDT" | "BTCUSDT" | "ETHUSDT"
+  side            String   // LONG | SHORT
+  size            Float    // Position size in quote (USDT notional value)
+  leverage        Int      // Leverage used
+  entryPrice      Float    // Average entry price
+  margin          Float    // Initial margin locked
+  liquidationPrice Float   // Price at which position gets liquidated
+  realizedPnl     Float    @default(0) // Realized PnL when closed
+  status          String   @default("open") // open | closed | liquidated
+  openedAt        DateTime @default(now())
+  closedAt        DateTime?
+  updatedAt       DateTime @updatedAt
 
-  @@unique([userId, symbol]) // dipakai di where: { userId_symbol: { ... } }
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol, status]) // One open position per symbol per user
+  @@index([userId, status])
+  @@index([symbol, status])
   @@map("positions")
 }
