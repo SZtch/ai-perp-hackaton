@@ -37,6 +37,18 @@ export class USDTJettonService {
     });
     this.platformAddress = PLATFORM_WALLET_ADDRESS;
     this.usdtMaster = USDT_JETTON_MASTER;
+
+    // Warn if platform address not configured
+    if (!this.platformAddress || this.platformAddress.trim() === "") {
+      console.warn(
+        "[USDT] ⚠️ PLATFORM_WALLET_ADDRESS not configured - using default testnet address"
+      );
+      console.warn(
+        "[USDT] 💡 Set PLATFORM_WALLET_ADDRESS in environment variables for production use"
+      );
+    } else {
+      console.log(`[USDT] ✅ Platform wallet configured: ${this.platformAddress.slice(0, 10)}...`);
+    }
   }
 
   /**
@@ -190,6 +202,14 @@ export class USDTJettonService {
   getPlatformJettonWallet(): string {
     // In production: calculate the actual Jetton wallet address
     // For now, return main platform address
+
+    // If not configured, return a default testnet address
+    if (!this.platformAddress || this.platformAddress.trim() === "") {
+      // Return a demo testnet address (this is a well-known testnet address)
+      // In production, this should be replaced with your actual platform wallet
+      return "0QCOd7YqOh6-EsEI5U2hFeIL2dDQi8kEwPQh36yzPR7CR-vZ";
+    }
+
     return this.platformAddress;
   }
 
