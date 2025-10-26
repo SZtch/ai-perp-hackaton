@@ -171,6 +171,9 @@ export function TradingDashboard() {
 
           {activeTab === 'wallet' && portfolio?.wallet && (
             <div className="space-y-6">
+              {/* Testnet Faucet - Featured at Top */}
+              <FaucetClaim onSuccess={handleRefresh} />
+
               {/* Balance Cards */}
               <div className="bg-slate-800 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-white mb-4">💰 Wallet Overview</h2>
@@ -204,9 +207,6 @@ export function TradingDashboard() {
                   </div>
                 </div>
               </div>
-
-              {/* Testnet Faucet */}
-              <FaucetClaim onSuccess={handleRefresh} />
 
               {/* Deposit & Withdraw */}
               <div className="grid md:grid-cols-2 gap-6">
