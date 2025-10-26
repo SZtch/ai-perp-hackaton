@@ -46,6 +46,49 @@ router.get("/history", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// POST /api/positions/cleanup - Emergency cleanup: close ALL open positions
+router.post("/cleanup", async (req: AuthedRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: "unauthorized" });
+
+    // Get wallet first
+    const wallet = await prisma.wallet.findUnique({
+      where: { userId: req.user.userId },
+    });
+
+    const lockedMargin = wallet?.lockedMargin || 0;
+
+    // FORCE DELETE all open positions (bypass unique constraint)
+    const result = await prisma.position.deleteMany({
+      where: { userId: req.user.userId, status: "open" },
+    });
+
+    console.log(`[Cleanup] Deleted ${result.count} open positions for user ${req.user.userId}`);
+
+    // Release all locked margin
+    if (wallet && lockedMargin > 0) {
+      await prisma.wallet.update({
+        where: { userId: req.user.userId },
+        data: {
+          usdtBalance: wallet.usdtBalance + lockedMargin,
+          lockedMargin: 0,
+        },
+      });
+      console.log(`[Cleanup] Released ${lockedMargin} USDT margin`);
+    }
+
+    res.json({
+      success: true,
+      deletedCount: result.count,
+      releasedMargin: lockedMargin,
+      message: `Deleted ${result.count} open positions and released ${lockedMargin.toFixed(2)} USDT`,
+    });
+  } catch (error: any) {
+    console.error("[Cleanup] Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/positions/:id/close - Close a position
 router.post("/:id/close", async (req: AuthedRequest, res: Response) => {
   try {
@@ -71,7 +114,10 @@ router.post("/:id/close", async (req: AuthedRequest, res: Response) => {
     }
 
     // Calculate final PnL at current price
-    const positionWithPnL = await positionCalculator.calculatePositionPnL(position);
+    const positionWithPnL = await positionCalculator.getPositionWithPnL(positionId);
+    if (!positionWithPnL) {
+      return res.status(500).json({ error: "Unable to calculate position PnL" });
+    }
     const realizedPnl = positionWithPnL.unrealizedPnl;
 
     // Close position

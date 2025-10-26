@@ -183,20 +183,28 @@ async function executeOrder(
     });
 
     if (existing) {
+      // For now, reject if user already has open position for this symbol
+      // User must close existing position first
+      throw new Error(
+        `You already have an open ${existing.side} position for ${symbol}. ` +
+        `Please close it first before opening a new position.`
+      );
+
+      // TODO: Implement position merging/increase logic properly
       // Close or reduce existing position if opposite side
-      if (existing.side !== positionSide) {
-        return await closeOrReducePosition(
-          existing,
-          size,
-          fillPrice,
-          fee,
-          userId,
-          orderId
-        );
-      }
+      // if (existing.side !== positionSide) {
+      //   return await closeOrReducePosition(
+      //     existing,
+      //     size,
+      //     fillPrice,
+      //     fee,
+      //     userId,
+      //     orderId
+      //   );
+      // }
 
       // Otherwise, increase position (add to existing)
-      return await increasePosition(existing, size, fillPrice, leverage, fee, userId);
+      // return await increasePosition(existing, size, fillPrice, leverage, fee, userId);
     }
 
     // Open new position
@@ -250,19 +258,12 @@ async function openNewPosition(
       },
     }),
 
-    // Lock margin in wallet
+    // Lock margin in wallet and deduct margin + fee from balance
     prisma.wallet.update({
       where: { userId },
       data: {
-        lockedMargin: { increment: margin },
-      },
-    }),
-
-    // Deduct fee
-    prisma.wallet.update({
-      where: { userId },
-      data: {
-        usdtBalance: { decrement: fee },
+        usdtBalance: { decrement: margin + fee },  // Deduct margin AND fee
+        lockedMargin: { increment: margin },        // Lock margin
       },
     }),
 

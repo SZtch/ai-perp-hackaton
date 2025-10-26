@@ -41,10 +41,12 @@ class WalletService {
   }
 
   /**
-   * Initiate deposit (get platform wallet address)
+   * Get deposit information (platform address, instructions, etc.)
    */
-  async initiateDeposit() {
-    const response = await apiClient.post('/api/wallet/deposit/initiate');
+  async getDepositInfo(amount?: number) {
+    const response = await apiClient.post('/api/wallet/deposit', {
+      amount: amount || 100,
+    });
     return response.data;
   }
 

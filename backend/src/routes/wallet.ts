@@ -2,6 +2,7 @@
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../db";
 import { tonService } from "../services/ton-testnet-service";
+import { usdtJettonService } from "../services/usdt-jetton-service";
 import { z } from "zod";
 
 const router = Router();
@@ -60,8 +61,10 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
     const available = wallet.usdtBalance - wallet.lockedMargin;
 
     res.json({
-      balance: wallet.usdtBalance,
-      locked: wallet.lockedMargin,
+      usdtBalance: wallet.usdtBalance,
+      lockedMargin: wallet.lockedMargin,
+      balance: wallet.usdtBalance, // Alias for compatibility
+      locked: wallet.lockedMargin, // Alias for compatibility
       available,
       equity,
       unrealizedPnl: totalUnrealizedPnl,
@@ -91,9 +94,9 @@ router.post("/deposit", async (req: AuthedRequest, res: Response) => {
       return res.status(400).json({ error: parsed.error.issues });
     }
 
-    const depositAddress = tonService.getDepositAddress();
+    const depositAddress = usdtJettonService.getPlatformJettonWallet();
 
-    // Generate QR code data (user can scan to send)
+    // Generate QR code data for USDT transfer
     const qrData = `ton://transfer/${depositAddress}`;
 
     res.json({
@@ -101,16 +104,18 @@ router.post("/deposit", async (req: AuthedRequest, res: Response) => {
       qrCode: qrData,
       amount: parsed.data.amount,
       memo: `DEPOSIT-${req.user.userId}`,
+      currency: "USDT",
       instructions: [
         "1. Open your TON wallet (Tonkeeper, etc.)",
-        "2. Send TEST USDT to the address above",
-        "3. Wait for confirmation (usually 10-30 seconds)",
-        "4. Your balance will update automatically",
+        "2. Send USDT (Jetton) to the address above",
+        "3. After sending, submit the transaction hash for verification",
+        "4. Your balance will be credited after verification (usually instant)",
       ],
-      note: "This is TESTNET - use TEST USDT only!",
+      note: "⚠️ TESTNET ONLY - Send TEST USDT on TON Testnet!",
+      warning: "Make sure to send USDT Jetton, not native TON!",
     });
   } catch (error: any) {
-    console.error("[Wallet] Error generating deposit:", error);
+    console.error("[Wallet] Error generating deposit info:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -134,67 +139,34 @@ router.post("/deposit/confirm", async (req: AuthedRequest, res: Response) => {
 
     const { txHash, amount } = parsed.data;
 
-    // Check if transaction already processed
-    const existing = await prisma.transaction.findFirst({
-      where: { txHash },
-    });
+    // Process USDT Jetton deposit (includes verification and crediting)
+    const success = await usdtJettonService.processUSDTDeposit(
+      req.user.userId,
+      amount,
+      txHash,
+      req.user.address
+    );
 
-    if (existing) {
-      return res.status(400).json({ error: "Transaction already processed" });
-    }
-
-    // Verify transaction on TON blockchain
-    const verified = await tonService.verifyTransaction(txHash, amount);
-    if (!verified) {
+    if (!success) {
       return res.status(400).json({
-        error: "Transaction verification failed. Please check tx hash and amount.",
+        error: "USDT deposit verification failed. Please check tx hash and amount.",
       });
     }
 
-    // Get or create wallet
-    let wallet = await prisma.wallet.findUnique({
+    // Get updated wallet balance
+    const wallet = await prisma.wallet.findUnique({
       where: { userId: req.user.userId },
     });
 
-    if (!wallet) {
-      wallet = await prisma.wallet.create({
-        data: { userId: req.user.userId },
-      });
-    }
-
-    // Credit balance
-    const newBalance = wallet.usdtBalance + amount;
-
-    await prisma.$transaction([
-      prisma.wallet.update({
-        where: { userId: req.user.userId },
-        data: {
-          usdtBalance: newBalance,
-          totalDeposit: wallet.totalDeposit + amount,
-        },
-      }),
-      prisma.transaction.create({
-        data: {
-          userId: req.user.userId,
-          type: "DEPOSIT",
-          amount,
-          balanceAfter: newBalance,
-          txHash,
-          fromAddress: req.user.address,
-          status: "confirmed",
-          confirmedAt: new Date(),
-        },
-      }),
-    ]);
-
     res.json({
       success: true,
-      newBalance,
+      newBalance: wallet?.usdtBalance || 0,
       amount,
       txHash,
+      message: "USDT deposit confirmed successfully",
     });
   } catch (error: any) {
-    console.error("[Wallet] Error confirming deposit:", error);
+    console.error("[Wallet] Error confirming USDT deposit:", error);
     res.status(500).json({ error: error.message });
   }
 });

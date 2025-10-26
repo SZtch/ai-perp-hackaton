@@ -5,15 +5,18 @@ import { useAuth } from '@/providers/auth-provider';
 import { PositionsList } from './positions-list';
 import { OpenPositionForm } from './open-position-form';
 import { MarketStats } from './market-stats';
+// import { PriceChart } from './price-chart'; // Temporarily disabled
 import { PnLDisplay } from './pnl-display';
 import { WalletDeposit } from './wallet-deposit';
 import { WalletWithdraw } from './wallet-withdraw';
+import { FaucetClaim } from './faucet-claim';
 import { portfolioService } from '@/services/portfolio.service';
 import { Position } from '@/services/trading.service';
 
 export function TradingDashboard() {
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'trade' | 'positions' | 'wallet'>('trade');
+  // const [selectedSymbol, setSelectedSymbol] = useState<string>('BTCUSDT'); // Temporarily disabled for chart
   const [positions, setPositions] = useState<Position[]>([]);
   const [portfolio, setPortfolio] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -100,11 +103,36 @@ export function TradingDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Testnet Faucet Banner - Always Visible */}
+        <FaucetClaim onSuccess={handleRefresh} />
+
         {/* PnL Display */}
         {portfolio && <PnLDisplay portfolio={portfolio} />}
 
         {/* Market Stats */}
         <MarketStats />
+
+        {/* Price Chart - Temporarily disabled for debugging
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400 text-sm">Chart Symbol:</span>
+            {['BTCUSDT', 'ETHUSDT', 'TONUSDT'].map((symbol) => (
+              <button
+                key={symbol}
+                onClick={() => setSelectedSymbol(symbol)}
+                className={`px-3 py-1 rounded text-sm transition-colors ${
+                  selectedSymbol === symbol
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}
+              >
+                {symbol.replace('USDT', '')}
+              </button>
+            ))}
+          </div>
+          <PriceChart symbol={selectedSymbol} height={350} />
+        </div>
+        */}
 
         {/* Tabs */}
         <div className="flex gap-2 border-b border-slate-700">

@@ -57,25 +57,26 @@ export class PositionCalculator {
   /**
    * Calculate liquidation price
    * Formula:
-   * - LONG: entryPrice * (1 - (1/leverage) + maintenanceMargin)
-   * - SHORT: entryPrice * (1 + (1/leverage) - maintenanceMargin)
+   * - LONG: entryPrice * (1 - 1/leverage)
+   * - SHORT: entryPrice * (1 + 1/leverage)
    *
-   * maintenanceMargin = 5% (0.05) default
+   * Example with 20x leverage:
+   * - LONG can drop 5% before liquidation
+   * - SHORT can rise 5% before liquidation
    */
   calculateLiquidationPrice(
     side: string,
     entryPrice: number,
-    leverage: number,
-    maintenanceMargin: number = 0.05
+    leverage: number
   ): number {
     const leverageRatio = 1 / leverage;
 
     if (side === "LONG") {
-      // For LONG: price drops
-      return entryPrice * (1 - leverageRatio + maintenanceMargin);
+      // For LONG: price can drop by (1/leverage)% before liquidation
+      return entryPrice * (1 - leverageRatio);
     } else if (side === "SHORT") {
-      // For SHORT: price rises
-      return entryPrice * (1 + leverageRatio - maintenanceMargin);
+      // For SHORT: price can rise by (1/leverage)% before liquidation
+      return entryPrice * (1 + leverageRatio);
     }
 
     return 0;
