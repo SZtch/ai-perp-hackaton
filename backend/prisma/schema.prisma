@@ -167,8 +167,10 @@ model Position {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, symbol, status]) // One open position per symbol per user
+  // Note: Unique constraint removed to allow multiple closed positions per symbol
+  // Application logic enforces: only 1 OPEN position per symbol per user
   @@index([userId, status])
   @@index([symbol, status])
+  @@index([userId, symbol, status]) // For querying open positions
   @@map("positions")
 }
