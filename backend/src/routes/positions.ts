@@ -51,41 +51,37 @@ router.post("/cleanup", async (req: AuthedRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "unauthorized" });
 
-    // Get all open positions
-    const openPositions = await prisma.position.findMany({
-      where: { userId: req.user.userId, status: "open" },
-    });
-
-    console.log(`[Cleanup] Found ${openPositions.length} open positions for user ${req.user.userId}`);
-
-    // Force close ALL positions using updateMany (bypasses unique constraint)
-    const result = await prisma.position.updateMany({
-      where: { userId: req.user.userId, status: "open" },
-      data: { status: "closed", closedAt: new Date(), realizedPnl: 0 },
-    });
-
-    // Release all locked margin
+    // Get wallet first
     const wallet = await prisma.wallet.findUnique({
       where: { userId: req.user.userId },
     });
 
-    if (wallet && wallet.lockedMargin > 0) {
+    const lockedMargin = wallet?.lockedMargin || 0;
+
+    // FORCE DELETE all open positions (bypass unique constraint)
+    const result = await prisma.position.deleteMany({
+      where: { userId: req.user.userId, status: "open" },
+    });
+
+    console.log(`[Cleanup] Deleted ${result.count} open positions for user ${req.user.userId}`);
+
+    // Release all locked margin
+    if (wallet && lockedMargin > 0) {
       await prisma.wallet.update({
         where: { userId: req.user.userId },
         data: {
-          usdtBalance: wallet.usdtBalance + wallet.lockedMargin,
+          usdtBalance: wallet.usdtBalance + lockedMargin,
           lockedMargin: 0,
         },
       });
+      console.log(`[Cleanup] Released ${lockedMargin} USDT margin`);
     }
-
-    console.log(`[Cleanup] Closed ${result.count} positions and released ${wallet?.lockedMargin || 0} USDT`);
 
     res.json({
       success: true,
-      closedCount: result.count,
-      releasedMargin: wallet?.lockedMargin || 0,
-      message: `Cleaned up ${result.count} positions`,
+      deletedCount: result.count,
+      releasedMargin: lockedMargin,
+      message: `Deleted ${result.count} open positions and released ${lockedMargin.toFixed(2)} USDT`,
     });
   } catch (error: any) {
     console.error("[Cleanup] Error:", error);
