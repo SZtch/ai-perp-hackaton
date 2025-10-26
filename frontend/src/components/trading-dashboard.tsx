@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { PositionsList } from './positions-list';
 import { OpenPositionForm } from './open-position-form';
 import { MarketStats } from './market-stats';
-import { PriceChart } from './price-chart';
+// import { PriceChart } from './price-chart'; // Temporarily disabled
 import { PnLDisplay } from './pnl-display';
 import { WalletDeposit } from './wallet-deposit';
 import { WalletWithdraw } from './wallet-withdraw';
@@ -15,7 +15,7 @@ import { Position } from '@/services/trading.service';
 export function TradingDashboard() {
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'trade' | 'positions' | 'wallet'>('trade');
-  const [selectedSymbol, setSelectedSymbol] = useState<string>('BTCUSDT');
+  // const [selectedSymbol, setSelectedSymbol] = useState<string>('BTCUSDT'); // Temporarily disabled for chart
   const [positions, setPositions] = useState<Position[]>([]);
   const [portfolio, setPortfolio] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -108,7 +108,7 @@ export function TradingDashboard() {
         {/* Market Stats */}
         <MarketStats />
 
-        {/* Price Chart */}
+        {/* Price Chart - Temporarily disabled for debugging
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-slate-400 text-sm">Chart Symbol:</span>
@@ -128,6 +128,7 @@ export function TradingDashboard() {
           </div>
           <PriceChart symbol={selectedSymbol} height={350} />
         </div>
+        */}
 
         {/* Tabs */}
         <div className="flex gap-2 border-b border-slate-700">
