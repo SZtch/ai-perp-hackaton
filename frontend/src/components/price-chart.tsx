@@ -53,6 +53,56 @@ export function PriceChart({ symbol, height = 400 }: PriceChartProps) {
 
     seriesRef.current = areaSeries;
 
+    // Fetch initial data
+    const fetchPriceHistory = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await tradingService.getPriceHistory(symbol, 100);
+
+        if (!response.data || response.data.length === 0) {
+          setError('No price data available');
+          setLoading(false);
+          return;
+        }
+
+        // Convert data to chart format (reverse to get chronological order)
+        const chartData = response.data
+          .reverse()
+          .map(item => ({
+            time: Math.floor(item.timestamp / 1000) as UTCTimestamp,
+            value: item.price,
+          }));
+
+        if (areaSeries) {
+          areaSeries.setData(chartData);
+        }
+
+        setLoading(false);
+      } catch (err: any) {
+        console.error('Error fetching price history:', err);
+        setError(err.message || 'Failed to load chart data');
+        setLoading(false);
+      }
+    };
+
+    // Fetch latest price for real-time updates
+    const fetchLatestPrice = async () => {
+      try {
+        const priceData = await tradingService.getPrice(symbol);
+
+        if (areaSeries && priceData.price > 0) {
+          areaSeries.update({
+            time: Math.floor(priceData.timestamp / 1000) as UTCTimestamp,
+            value: priceData.price,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching latest price:', err);
+      }
+    };
+
     // Handle resize
     const handleResize = () => {
       if (chartContainerRef.current) {
@@ -75,54 +125,7 @@ export function PriceChart({ symbol, height = 400 }: PriceChartProps) {
       clearInterval(interval);
       chart.remove();
     };
-  }, [symbol]);
-
-  const fetchPriceHistory = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await tradingService.getPriceHistory(symbol, 100);
-
-      if (!response.data || response.data.length === 0) {
-        setError('No price data available');
-        return;
-      }
-
-      // Convert data to chart format (reverse to get chronological order)
-      const chartData = response.data
-        .reverse()
-        .map(item => ({
-          time: Math.floor(item.timestamp / 1000) as UTCTimestamp,
-          value: item.price,
-        }));
-
-      if (seriesRef.current) {
-        seriesRef.current.setData(chartData);
-      }
-
-      setLoading(false);
-    } catch (err: any) {
-      console.error('Error fetching price history:', err);
-      setError(err.message || 'Failed to load chart data');
-      setLoading(false);
-    }
-  };
-
-  const fetchLatestPrice = async () => {
-    try {
-      const priceData = await tradingService.getPrice(symbol);
-
-      if (seriesRef.current && priceData.price > 0) {
-        seriesRef.current.update({
-          time: Math.floor(priceData.timestamp / 1000) as UTCTimestamp,
-          value: priceData.price,
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching latest price:', err);
-    }
-  };
+  }, [symbol, height]);
 
   if (error) {
     return (
