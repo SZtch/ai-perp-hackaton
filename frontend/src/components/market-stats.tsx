@@ -57,17 +57,15 @@ export function MarketStats() {
             <div key={symbol} className="bg-slate-700/50 rounded-lg p-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-slate-300 font-medium">{baseAsset}/USDT</span>
-                <span className={`text-xs px-2 py-0.5 rounded ${
-                  price.confidence >= 90 ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
-                }`}>
-                  {price.confidence}%
+                <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400">
+                  Live
                 </span>
               </div>
               <div className="text-xl font-bold text-white">
                 ${price.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-slate-500 mt-1">
-                Vol: {price.volatility.toFixed(2)}%
+              <div className="text-xs text-slate-400 mt-1">
+                Updated {new Date(price.timestamp).toLocaleTimeString()}
               </div>
             </div>
           );
