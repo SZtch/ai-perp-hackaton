@@ -59,12 +59,22 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
       // For hackathon: Use simple TON transfer instead of Jetton
       // In production, this would be a Jetton transfer with proper payload
 
+      // Parse and validate the deposit address
+      let parsedAddress: Address;
+      try {
+        parsedAddress = Address.parse(depositAddress);
+      } catch (e) {
+        toast.error('Invalid deposit address format');
+        console.error('[Deposit] Address parse error:', e);
+        return;
+      }
+
       // Construct transfer message
       const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 600, // 10 minutes
         messages: [
           {
-            address: depositAddress,
+            address: parsedAddress.toString({ bounceable: true, testOnly: true }), // Format for testnet
             amount: toNano(0.05).toString(), // Small TON amount for gas
             payload: beginCell()
               .storeUint(0, 32) // op code for comment
@@ -77,6 +87,7 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
       };
 
       console.log('[Deposit] Requesting transaction approval:', transaction);
+      console.log('[Deposit] Parsed address:', parsedAddress.toString({ bounceable: true, testOnly: true }));
 
       // Request transaction from wallet
       const result = await tonConnectUI.sendTransaction(transaction);
