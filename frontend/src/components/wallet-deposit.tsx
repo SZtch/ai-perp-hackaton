@@ -177,20 +177,30 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
       {/* Deposit Address Info */}
       <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-4">
         <p className="text-sm text-blue-300 mb-2">
-          <strong>📍 Platform Wallet (TON Testnet):</strong>
+          <strong>📍 Deposit Address (TON Testnet):</strong>
+        </p>
+        <p className="text-xs text-slate-400 mb-3">
+          Kirim USDT ke address platform ini untuk deposit
         </p>
         <div className="flex items-center gap-2 bg-slate-800/50 rounded px-3 py-2">
-          <code className="text-xs text-green-400 flex-1 overflow-x-auto">
-            {depositAddress || 'Loading...'}
-          </code>
-          {depositAddress && (
-            <button
-              onClick={copyAddress}
-              className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
-              title="Copy address"
-            >
-              📋
-            </button>
+          {depositAddress ? (
+            <>
+              <code className="text-xs text-green-400 flex-1 overflow-x-auto break-all">
+                {depositAddress}
+              </code>
+              <button
+                onClick={copyAddress}
+                className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
+                title="Copy address"
+              >
+                📋
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 text-yellow-400 text-xs">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
+              <span>Memuat address platform...</span>
+            </div>
           )}
         </div>
       </div>
