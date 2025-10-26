@@ -8,6 +8,7 @@ import orders from "./routes/orders"; // Orders with leverage & margin
 import positions from "./routes/positions";
 import wallet from "./routes/wallet"; // Wallet management
 import portfolio from "./routes/portfolio"; // Portfolio overview
+import faucet from "./routes/faucet"; // Testnet faucet
 
 import { requireAuth } from "./middleware/auth";
 import { authLimiter, orderLimiter } from "./middleware/limits";
@@ -59,6 +60,9 @@ app.use("/api/orders", orderLimiter, requireAuth, orders);
 // positions
 app.use("/api/positions", requireAuth, positions);
 
+// testnet faucet
+app.use("/api/faucet", requireAuth, faucet);
+
 // whoami - get current user info
 app.get("/me", requireAuth, (req, res) => {
   res.json({
@@ -78,6 +82,7 @@ app.listen(port, () => {
   console.log(`📡 Server running on port ${port}`);
   console.log(`🌐 Network: ${process.env.TON_NETWORK || "testnet"}`);
   console.log(`💰 Symbols: ${process.env.FEED_SYMBOLS || "TONUSDT,BTCUSDT,ETHUSDT"}`);
+  console.log(`💧 Faucet: ${process.env.FAUCET_AMOUNT || "1000"} USDT per claim`);
   console.log("===========================================");
 
   // Start price feed monitoring

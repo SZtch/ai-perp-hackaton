@@ -9,6 +9,7 @@ import { MarketStats } from './market-stats';
 import { PnLDisplay } from './pnl-display';
 import { WalletDeposit } from './wallet-deposit';
 import { WalletWithdraw } from './wallet-withdraw';
+import { FaucetClaim } from './faucet-claim';
 import { portfolioService } from '@/services/portfolio.service';
 import { Position } from '@/services/trading.service';
 
@@ -203,6 +204,9 @@ export function TradingDashboard() {
                   </div>
                 </div>
               </div>
+
+              {/* Testnet Faucet */}
+              <FaucetClaim onSuccess={handleRefresh} />
 
               {/* Deposit & Withdraw */}
               <div className="grid md:grid-cols-2 gap-6">
