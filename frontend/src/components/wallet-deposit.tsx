@@ -153,76 +153,109 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
   const quickAmounts = [100, 500, 1000, 5000, 10000];
 
   return (
-    <div className="bg-slate-700/30 rounded-lg p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-2xl">💵</span>
-        <h3 className="text-xl font-bold text-white">Deposit USDT</h3>
+    <div className="relative overflow-hidden rounded-xl bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 p-6 hover:border-slate-600/50 transition-all duration-300">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+          <span className="text-2xl">💵</span>
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-white">Deposit USDT</h3>
+          <p className="text-xs text-slate-400">Add funds to your account</p>
+        </div>
       </div>
 
       {/* Wallet Status */}
       {wallet ? (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-4">
-          <p className="text-xs text-green-300">
-            ✅ <strong>Wallet Connected:</strong> {wallet.account.address.slice(0, 8)}...{wallet.account.address.slice(-6)}
-          </p>
+        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 p-3.5 mb-4">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5" />
+          <div className="relative flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm">✅</span>
+            </div>
+            <p className="text-xs text-green-200 flex-1">
+              <strong className="text-green-300">Wallet Connected:</strong>{' '}
+              <code className="text-green-400 font-mono">{wallet.account.address.slice(0, 8)}...{wallet.account.address.slice(-6)}</code>
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
-          <p className="text-xs text-yellow-300">
-            ⚠️ Please connect your TON wallet to enable blockchain deposits
-          </p>
+        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 p-3.5 mb-4">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-orange-500/5" />
+          <div className="relative flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm">⚠️</span>
+            </div>
+            <p className="text-xs text-yellow-200">
+              Please connect your TON wallet to enable blockchain deposits
+            </p>
+          </div>
         </div>
       )}
 
       {/* Deposit Address Info */}
-      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-4">
-        <p className="text-sm text-blue-300 mb-2">
-          <strong>📍 Deposit Address (TON Testnet):</strong>
-        </p>
-        <p className="text-xs text-slate-400 mb-3">
-          Kirim USDT ke address platform ini untuk deposit
-        </p>
-        <div className="flex items-center gap-2 bg-slate-800/50 rounded px-3 py-2">
-          {depositAddress ? (
-            <>
-              <code className="text-xs text-green-400 flex-1 overflow-x-auto break-all">
-                {depositAddress}
-              </code>
-              <button
-                onClick={copyAddress}
-                className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
-                title="Copy address"
-              >
-                📋
-              </button>
-            </>
-          ) : (
-            <div className="flex items-center gap-2 text-yellow-400 text-xs">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
-              <span>Memuat address platform...</span>
+      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30 p-4 mb-5">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 rounded-lg bg-blue-500/20 flex items-center justify-center">
+              <span className="text-xs">📍</span>
             </div>
-          )}
+            <p className="text-sm font-semibold text-blue-300">
+              Deposit Address (TON Testnet)
+            </p>
+          </div>
+          <p className="text-xs text-blue-200/80 mb-3">
+            Kirim USDT ke address platform ini untuk deposit
+          </p>
+          <div className="flex items-center gap-2 bg-slate-900/50 rounded-lg px-3 py-2.5 border border-blue-500/20">
+            {depositAddress ? (
+              <>
+                <code className="text-xs text-green-400 flex-1 overflow-x-auto break-all font-mono">
+                  {depositAddress}
+                </code>
+                <button
+                  onClick={copyAddress}
+                  className="p-1.5 rounded-md bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 transition-colors flex-shrink-0"
+                  title="Copy address"
+                >
+                  <span className="text-sm">📋</span>
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 text-yellow-400 text-xs py-1">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-400/30 border-t-yellow-400"></div>
+                <span>Memuat address platform...</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-4">
+        {/* Amount Input */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2.5">
             Amount (USDT)
           </label>
-          <input
-            type="number"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-            className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="relative">
+            <input
+              type="number"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              className="w-full px-4 py-3.5 bg-slate-700/50 border border-slate-600/50 hover:border-slate-500/50 focus:border-blue-500/50 text-white rounded-lg text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all tabular-nums"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">
+              USDT
+            </div>
+          </div>
         </div>
 
         {/* Quick amount buttons */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2.5">
             Quick Amount
           </label>
           <div className="grid grid-cols-5 gap-2">
@@ -231,7 +264,7 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
                 key={quickAmount}
                 type="button"
                 onClick={() => setAmount(quickAmount.toString())}
-                className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm transition-colors"
+                className="px-3 py-2.5 bg-slate-700/50 hover:bg-slate-600/60 border border-slate-600/50 hover:border-slate-500/50 text-slate-200 hover:text-white rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 ${quickAmount >= 1000 ? `${quickAmount / 1000}k` : quickAmount}
               </button>
@@ -240,25 +273,29 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-3">
+        <div className="space-y-2.5 pt-2">
           {/* Blockchain Deposit Button */}
           <button
             type="button"
             onClick={handleBlockchainDeposit}
             disabled={loading || !amount || !wallet}
-            className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="group relative w-full px-5 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] disabled:shadow-none overflow-hidden"
           >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Processing...
-              </>
-            ) : (
-              <>
-                🔗 Deposit via Wallet
-                {amount && ` ($${parseFloat(amount).toFixed(2)})`}
-              </>
-            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+            <span className="relative flex items-center justify-center gap-2">
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-base">🔗</span>
+                  <span>Deposit via Wallet</span>
+                  {amount && <span className="text-blue-100">($${parseFloat(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>}
+                </>
+              )}
+            </span>
           </button>
 
           {/* Test Deposit Button */}
@@ -266,26 +303,44 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
             type="button"
             onClick={handleTestDeposit}
             disabled={loading || !amount}
-            className="w-full px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 disabled:bg-slate-600 disabled:border-slate-600 disabled:cursor-not-allowed text-purple-300 font-bold rounded-lg transition-colors"
+            className="w-full px-5 py-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/40 hover:border-purple-500/60 disabled:bg-slate-700/50 disabled:border-slate-600/50 disabled:cursor-not-allowed text-purple-300 hover:text-purple-200 disabled:text-slate-500 font-semibold rounded-lg transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
           >
-            {loading ? 'Processing...' : '⚡ Test Deposit (Instant)'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400/30 border-t-purple-400"></div>
+                <span>Processing...</span>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <span>⚡</span>
+                <span>Test Deposit (Instant)</span>
+              </span>
+            )}
           </button>
         </div>
 
         {/* Info */}
-        <div className="bg-slate-800/50 rounded p-3">
-          <p className="text-xs text-slate-400 mb-2">
-            <strong className="text-slate-300">💡 How it works:</strong>
-          </p>
-          <ol className="text-xs text-slate-400 space-y-1 ml-4 list-decimal">
-            <li>Enter deposit amount</li>
-            <li>Click "Deposit via Wallet"</li>
-            <li>Approve transaction in your TON wallet</li>
-            <li>Balance will be credited automatically</li>
-          </ol>
-          <p className="text-xs text-slate-500 mt-2 italic">
-            Use "Test Deposit" for instant testing without blockchain transaction
-          </p>
+        <div className="relative overflow-hidden rounded-lg bg-slate-700/30 border border-slate-600/30 p-4 mt-4">
+          <div className="flex items-start gap-3">
+            <div className="w-5 h-5 rounded-lg bg-slate-600/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-xs">💡</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-slate-300 mb-2">
+                How it works:
+              </p>
+              <ol className="text-xs text-slate-400 space-y-1.5 ml-4 list-decimal">
+                <li>Enter deposit amount</li>
+                <li>Click "Deposit via Wallet"</li>
+                <li>Approve transaction in your TON wallet</li>
+                <li>Balance will be credited automatically</li>
+              </ol>
+              <p className="text-xs text-slate-500 mt-3 italic flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-purple-500"></span>
+                Use "Test Deposit" for instant testing without blockchain transaction
+              </p>
+            </div>
+          </div>
         </div>
       </form>
     </div>
