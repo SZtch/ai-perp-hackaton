@@ -258,19 +258,12 @@ async function openNewPosition(
       },
     }),
 
-    // Lock margin in wallet
+    // Lock margin in wallet and deduct margin + fee from balance
     prisma.wallet.update({
       where: { userId },
       data: {
-        lockedMargin: { increment: margin },
-      },
-    }),
-
-    // Deduct fee
-    prisma.wallet.update({
-      where: { userId },
-      data: {
-        usdtBalance: { decrement: fee },
+        usdtBalance: { decrement: margin + fee },  // Deduct margin AND fee
+        lockedMargin: { increment: margin },        // Lock margin
       },
     }),
 
