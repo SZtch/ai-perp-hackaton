@@ -63,6 +63,12 @@ export interface PriceData {
   timestamp: number;
 }
 
+export interface PriceHistoryResponse {
+  symbol: string;
+  data: PriceData[];
+  total: number;
+}
+
 class TradingService {
   /**
    * Get all trading pairs
@@ -131,6 +137,16 @@ class TradingService {
    */
   async getAllPrices(): Promise<Record<string, PriceData>> {
     const response = await apiClient.get<Record<string, PriceData>>('/api/oracle/prices');
+    return response.data;
+  }
+
+  /**
+   * Get price history for a symbol
+   */
+  async getPriceHistory(symbol: string, limit = 100, offset = 0): Promise<PriceHistoryResponse> {
+    const response = await apiClient.get<PriceHistoryResponse>('/api/oracle/history', {
+      params: { symbol, limit, offset },
+    });
     return response.data;
   }
 }
