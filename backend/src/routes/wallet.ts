@@ -60,8 +60,10 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
     const available = wallet.usdtBalance - wallet.lockedMargin;
 
     res.json({
-      balance: wallet.usdtBalance,
-      locked: wallet.lockedMargin,
+      usdtBalance: wallet.usdtBalance,
+      lockedMargin: wallet.lockedMargin,
+      balance: wallet.usdtBalance, // Alias for compatibility
+      locked: wallet.lockedMargin, // Alias for compatibility
       available,
       equity,
       unrealizedPnl: totalUnrealizedPnl,
