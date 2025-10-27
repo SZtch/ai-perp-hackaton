@@ -102,21 +102,23 @@ export function TradingPanel({
         <div className="flex gap-2">
           <button
             onClick={() => onOrderTypeChange('Long')}
-            className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all ${
+            disabled={orderLoading}
+            className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
               orderType === 'Long'
                 ? 'bg-green-600 text-white shadow-lg shadow-green-600/30'
                 : `${theme.bgTertiary} ${theme.textSecondary} ${theme.hover} hover:text-white`
-            } interactive-hover`}
+            } ${orderLoading ? '' : 'interactive-hover'}`}
           >
             Long
           </button>
           <button
             onClick={() => onOrderTypeChange('Short')}
-            className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all ${
+            disabled={orderLoading}
+            className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
               orderType === 'Short'
                 ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
                 : `${theme.bgTertiary} ${theme.textSecondary} ${theme.hover} hover:text-white`
-            } interactive-hover`}
+            } ${orderLoading ? '' : 'interactive-hover'}`}
           >
             Short
           </button>
@@ -183,10 +185,19 @@ export function TradingPanel({
           </div>
           <input
             type="number"
+            min="0"
+            step="0.01"
             value={orderSize}
-            onChange={(e) => onOrderSizeChange(e.target.value)}
-            placeholder="0.00"
-            className={`w-full ${theme.bgTertiary} border ${theme.borderSecondary} rounded-lg px-4 py-3.5 ${theme.text} ${darkMode ? 'placeholder-gray-600' : 'placeholder-gray-400'} focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all text-lg font-semibold`}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Only allow positive numbers or empty string
+              if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0)) {
+                onOrderSizeChange(value);
+              }
+            }}
+            placeholder="Min: $10.00"
+            disabled={orderLoading}
+            className={`w-full ${theme.bgTertiary} border ${theme.borderSecondary} rounded-lg px-4 py-3.5 ${theme.text} ${darkMode ? 'placeholder-gray-600' : 'placeholder-gray-400'} focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
           />
         </div>
 
@@ -206,7 +217,8 @@ export function TradingPanel({
               max="100"
               value={percentage}
               onChange={(e) => onPercentageChange(Number(e.target.value))}
-              className={`w-full h-2 ${darkMode ? 'bg-[#25262e]' : 'bg-gray-300'} rounded-full appearance-none cursor-pointer slider`}
+              disabled={orderLoading || availableBalance <= 0}
+              className={`w-full h-2 ${darkMode ? 'bg-[#25262e]' : 'bg-gray-300'} rounded-full appearance-none cursor-pointer slider disabled:opacity-50 disabled:cursor-not-allowed`}
               style={{
                 background: `linear-gradient(to right, #9333ea ${percentage}%, ${darkMode ? '#25262e' : '#d1d5db'} ${percentage}%)`
               }}
@@ -214,7 +226,9 @@ export function TradingPanel({
           </div>
           <div className="text-center mt-2">
             <span className={`text-sm font-semibold ${theme.text}`}>{percentage}%</span>
-            <span className={`text-xs ${theme.textTertiary} ml-1`}>of available balance</span>
+            <span className={`text-xs ${theme.textTertiary} ml-1`}>
+              {availableBalance > 0 ? 'of available balance' : 'No balance available'}
+            </span>
           </div>
         </div>
 
@@ -242,20 +256,39 @@ export function TradingPanel({
           <span>Add Take Profit / Stop Loss</span>
         </button>
 
+        {/* Validation Warning */}
+        {orderSize && parseFloat(orderSize) > 0 && parseFloat(orderSize) < 10 && (
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-3 py-2 text-sm text-yellow-500">
+            ⚠️ Minimum order size is $10.00
+          </div>
+        )}
+
+        {orderSize && availableBalance > 0 && ((parseFloat(orderSize) / leverage) + (parseFloat(orderSize) * 0.001)) > availableBalance && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-red-500">
+            ⚠️ Insufficient balance. Required: ${((parseFloat(orderSize) / leverage) + (parseFloat(orderSize) * 0.001)).toFixed(2)}
+          </div>
+        )}
+
         {/* Buy/Sell Button */}
         <button
           onClick={onOpenPosition}
-          disabled={orderLoading || !orderSize || parseFloat(orderSize) <= 0}
+          disabled={
+            orderLoading ||
+            !orderSize ||
+            isNaN(parseFloat(orderSize)) ||
+            parseFloat(orderSize) < 10 ||
+            ((parseFloat(orderSize) / leverage) + (parseFloat(orderSize) * 0.001)) > availableBalance
+          }
           className={`w-full py-4 rounded-lg font-bold text-white transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-base ${
             orderType === 'Long'
               ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 shadow-green-600/40'
               : 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-red-600/40'
-          } interactive-hover`}
+          } ${orderLoading ? '' : 'interactive-hover'}`}
         >
           {orderLoading ? (
             <span className="flex items-center justify-center gap-2">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-              <span>Opening Position...</span>
+              <span>Opening {orderType} Position...</span>
             </span>
           ) : (
             orderType === 'Long' ? 'Buy / Long' : 'Sell / Short'
