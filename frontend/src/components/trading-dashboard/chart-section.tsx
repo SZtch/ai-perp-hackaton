@@ -1,7 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { createChart, IChartApi, ISeriesApi, CandlestickData } from 'lightweight-charts';
+import React, { useState } from 'react';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+interface CandlestickData {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
 
 interface ChartSectionProps {
   data: CandlestickData[];
@@ -11,107 +19,30 @@ interface ChartSectionProps {
 }
 
 export function ChartSection({ data, darkMode, currentPrice, symbol }: ChartSectionProps) {
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
-  const candlestickSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
-  const [mounted, setMounted] = useState(false);
+  // Transform candlestick data to line chart data
+  const chartData = data.map(d => ({
+    time: new Date(d.time * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    price: d.close,
+    high: d.high,
+    low: d.low,
+  }));
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!chartContainerRef.current || !mounted) return;
-
-    // Create chart
-    const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
-      height: chartContainerRef.current.clientHeight,
-      layout: {
-        background: { color: darkMode ? '#0d0e12' : '#ffffff' },
-        textColor: darkMode ? '#9ca3af' : '#6b7280',
-      },
-      grid: {
-        vertLines: { color: darkMode ? '#1e1f26' : '#e5e7eb' },
-        horzLines: { color: darkMode ? '#1e1f26' : '#e5e7eb' },
-      },
-      crosshair: {
-        mode: 1,
-        vertLine: {
-          color: darkMode ? '#9333ea' : '#7c3aed',
-          width: 1,
-          style: 3,
-          labelBackgroundColor: '#9333ea',
-        },
-        horzLine: {
-          color: darkMode ? '#9333ea' : '#7c3aed',
-          width: 1,
-          style: 3,
-          labelBackgroundColor: '#9333ea',
-        },
-      },
-      rightPriceScale: {
-        borderColor: darkMode ? '#1e1f26' : '#e5e7eb',
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.1,
-        },
-      },
-      timeScale: {
-        borderColor: darkMode ? '#1e1f26' : '#e5e7eb',
-        timeVisible: true,
-        secondsVisible: false,
-      },
-    });
-
-    chartRef.current = chart;
-
-    // Add candlestick series
-    const candlestickSeries = chart.addCandlestickSeries({
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderUpColor: '#10b981',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
-    });
-
-    candlestickSeriesRef.current = candlestickSeries;
-
-    // Handle resize
-    const handleResize = () => {
-      if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-          height: chartContainerRef.current.clientHeight,
-        });
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      chart.remove();
-    };
-  }, [darkMode]);
-
-  // Update data when it changes
-  useEffect(() => {
-    if (candlestickSeriesRef.current && data.length > 0) {
-      candlestickSeriesRef.current.setData(data);
-
-      // Fit content nicely
-      if (chartRef.current) {
-        chartRef.current.timeScale().fitContent();
-      }
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className={`${darkMode ? 'bg-[#1a1c24] border-[#25262e]' : 'bg-white border-gray-200'} border px-3 py-2 rounded-lg shadow-xl`}>
+          <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>{payload[0].payload.time}</p>
+          <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            ${payload[0].value.toLocaleString()}
+          </p>
+        </div>
+      );
     }
-  }, [data]);
+    return null;
+  };
 
   return (
     <div className="relative w-full h-full">
-      <div ref={chartContainerRef} className="absolute inset-0 animate-fade-in" />
-
       {/* Price overlay badge */}
       {currentPrice > 0 && (
         <div className="absolute top-4 left-4 glass-card px-4 py-2 rounded-lg animate-fade-in-scale z-10">
@@ -130,9 +61,53 @@ export function ChartSection({ data, darkMode, currentPrice, symbol }: ChartSect
         </div>
       )}
 
+      {/* Chart */}
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#9333ea" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#9333ea" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={darkMode ? '#1e1f26' : '#e5e7eb'}
+            vertical={false}
+          />
+          <XAxis
+            dataKey="time"
+            stroke={darkMode ? '#6b7280' : '#9ca3af'}
+            tick={{ fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+            interval="preserveStartEnd"
+            minTickGap={50}
+          />
+          <YAxis
+            stroke={darkMode ? '#6b7280' : '#9ca3af'}
+            tick={{ fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+            domain={['dataMin - 50', 'dataMax + 50']}
+            tickFormatter={(value) => `$${value.toFixed(0)}`}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="price"
+            stroke="#9333ea"
+            strokeWidth={2}
+            fill="url(#colorPrice)"
+            dot={false}
+            animationDuration={300}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+
       {/* Empty state */}
       {data.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0d0e12]">
           <div className="text-center">
             <div className="animate-pulse">
               <svg className="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

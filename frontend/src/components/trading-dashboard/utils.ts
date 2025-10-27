@@ -1,4 +1,10 @@
-import { CandlestickData } from 'lightweight-charts';
+export interface CandlestickData {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
 
 /**
  * Generate realistic candlestick data for chart display
@@ -33,7 +39,7 @@ export function generateCandlestickData(
     const low = Math.min(open, close) - Math.random() * wickSize;
 
     data.push({
-      time: timestamp as any,
+      time: timestamp,
       open,
       high,
       low,

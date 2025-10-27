@@ -15,7 +15,7 @@ import { SidebarNav } from './sidebar-nav';
 import { HeaderStats } from './header-stats';
 import { TradingPanel } from './trading-panel';
 import { PositionsTable } from './positions-table';
-import { generateCandlestickData } from './utils';
+import { generateCandlestickData, CandlestickData } from './utils';
 
 // Dynamic import for ChartSection to avoid SSR issues
 const ChartSection = dynamic(() => import('./chart-section').then(mod => ({ default: mod.ChartSection })), {
