@@ -154,6 +154,16 @@ body {
 .spacing-lg { padding: 1.5rem; }  /* 24px */
 .spacing-xl { padding: 2rem; }    /* 32px */
 
+/* Scrollbar utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* ===========================
    TYPOGRAPHY IMPROVEMENTS
    =========================== */

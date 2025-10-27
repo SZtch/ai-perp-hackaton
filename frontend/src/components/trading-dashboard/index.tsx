@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { BarChart2, Settings, Maximize2, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/providers/auth-provider';
 import { useTonConnectUI, useTonWallet, useTonAddress } from '@tonconnect/ui-react';
@@ -12,10 +13,22 @@ import { faucetService } from '@/services/faucet.service';
 // Import new components
 import { SidebarNav } from './sidebar-nav';
 import { HeaderStats } from './header-stats';
-import { ChartSection } from './chart-section';
 import { TradingPanel } from './trading-panel';
 import { PositionsTable } from './positions-table';
 import { generateCandlestickData } from './utils';
+
+// Dynamic import for ChartSection to avoid SSR issues
+const ChartSection = dynamic(() => import('./chart-section').then(mod => ({ default: mod.ChartSection })), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-3"></div>
+        <p className="text-gray-500 text-sm">Loading chart...</p>
+      </div>
+    </div>
+  ),
+});
 
 export function TradingDashboard() {
   const { logout } = useAuth();

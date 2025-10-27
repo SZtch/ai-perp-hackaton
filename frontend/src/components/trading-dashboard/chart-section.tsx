@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi, CandlestickData } from 'lightweight-charts';
 
 interface ChartSectionProps {
@@ -14,9 +14,14 @@ export function ChartSection({ data, darkMode, currentPrice, symbol }: ChartSect
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!chartContainerRef.current || !mounted) return;
 
     // Create chart
     const chart = createChart(chartContainerRef.current, {

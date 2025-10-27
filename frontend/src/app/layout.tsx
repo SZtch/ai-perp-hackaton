@@ -1,6 +1,7 @@
 import { TonConnectProvider } from '@/providers/ton-connect-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { ToastProvider } from '@/providers/toast-provider';
+import { ErrorBoundary } from '@/components/error-boundary';
 import './globals.css';
 
 export const metadata = {
@@ -16,13 +17,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <TonConnectProvider>
-          <AuthProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </AuthProvider>
-        </TonConnectProvider>
+        <ErrorBoundary>
+          <TonConnectProvider>
+            <AuthProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </AuthProvider>
+          </TonConnectProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
