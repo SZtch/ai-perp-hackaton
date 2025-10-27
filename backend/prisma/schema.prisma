@@ -49,18 +49,22 @@ model TokenBlacklist {
 // ============================================
 
 model Wallet {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  usdtBalance  Float    @default(0)      // Available USDT balance
-  lockedMargin Float    @default(0)      // Margin locked in positions
-  totalDeposit Float    @default(0)      // Total deposited (lifetime)
-  totalWithdraw Float   @default(0)      // Total withdrawn (lifetime)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  usdtBalance           Float    @default(0)      // Available USDT balance
+  lockedMargin          Float    @default(0)      // Margin locked in positions
+  totalDeposit          Float    @default(0)      // Total deposited (lifetime)
+  totalWithdraw         Float    @default(0)      // Total withdrawn (lifetime)
+  depositAddress        String?  @unique          // Unique TON deposit address for this user
+  depositAddressMnemonic String?                  // Encrypted mnemonic for deposit wallet (optional, for advanced features)
+  lastDepositCheck      DateTime?                 // Last time we checked for deposits
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([depositAddress])
 }
 
 model Transaction {

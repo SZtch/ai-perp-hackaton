@@ -204,22 +204,27 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
         </div>
       )}
 
-      {/* Deposit Address Info */}
-      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30 p-4 mb-5">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5" />
+      {/* Unique Deposit Address Info */}
+      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/30 p-4 mb-5">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5" />
         <div className="relative">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-5 h-5 rounded-lg bg-blue-500/20 flex items-center justify-center">
-              <span className="text-xs">📍</span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <span className="text-xs">🔐</span>
+              </div>
+              <p className="text-sm font-semibold text-emerald-300">
+                Your Unique Deposit Address
+              </p>
             </div>
-            <p className="text-sm font-semibold text-blue-300">
-              Deposit Address (TON Testnet)
-            </p>
+            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold rounded-full">
+              EXCLUSIVE
+            </span>
           </div>
-          <p className="text-xs text-blue-200/80 mb-3">
-            Kirim USDT ke address platform ini untuk deposit
+          <p className="text-xs text-emerald-200/80 mb-3">
+            ✨ Alamat ini <strong className="text-emerald-300">UNIK</strong> untuk Anda! Kirim TON ke sini dan balance akan otomatis ter-credit dalam 30 detik.
           </p>
-          <div className="flex items-center gap-2 bg-slate-900/50 rounded-lg px-3 py-2.5 border border-blue-500/20">
+          <div className="flex items-center gap-2 bg-slate-900/50 rounded-lg px-3 py-2.5 border border-emerald-500/20 mb-3">
             {depositAddress ? (
               <>
                 <code className="text-xs text-green-400 flex-1 overflow-x-auto break-all font-mono">
@@ -227,7 +232,7 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
                 </code>
                 <button
                   onClick={copyAddress}
-                  className="p-1.5 rounded-md bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 transition-colors flex-shrink-0"
+                  className="p-1.5 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300 transition-colors flex-shrink-0"
                   title="Copy address"
                 >
                   <span className="text-sm">📋</span>
@@ -236,9 +241,16 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
             ) : (
               <div className="flex items-center gap-2 text-yellow-400 text-xs py-1">
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-400/30 border-t-yellow-400"></div>
-                <span>Memuat address platform...</span>
+                <span>Generating your unique address...</span>
               </div>
             )}
+          </div>
+          <div className="flex items-center gap-2 bg-emerald-500/10 rounded-lg px-3 py-2 border border-emerald-500/20">
+            <div className="flex-1">
+              <p className="text-[10px] font-semibold text-emerald-300 mb-0.5">AUTO-DETECTION ACTIVE</p>
+              <p className="text-[10px] text-emerald-200/70">Send TON and it will appear in your balance automatically (1 TON = 5 USDT)</p>
+            </div>
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></div>
           </div>
         </div>
       </div>
@@ -338,18 +350,20 @@ export function WalletDeposit({ onSuccess }: WalletDepositProps) {
             </div>
             <div className="flex-1">
               <p className="text-xs font-semibold text-slate-300 mb-2">
-                How it works:
+                Cara Deposit:
               </p>
               <ol className="text-xs text-slate-400 space-y-1.5 ml-4 list-decimal">
-                <li>Enter deposit amount</li>
-                <li>Click "Deposit via Wallet"</li>
-                <li>Approve transaction in your TON wallet</li>
-                <li>Balance will be credited automatically</li>
+                <li><strong className="text-emerald-400">CARA BARU (Recommended):</strong> Kirim TON langsung dari wallet Anda ke alamat unik di atas. Balance otomatis ter-credit!</li>
+                <li><strong className="text-blue-400">Via Form:</strong> Isi amount → klik "Deposit via Wallet" → approve di TON wallet</li>
               </ol>
               <p className="text-xs text-slate-500 mt-3 italic flex items-center gap-1.5">
                 <span className="w-1 h-1 rounded-full bg-purple-500"></span>
-                Use "Test Deposit" for instant testing without blockchain transaction
+                Test Deposit: untuk testing instant tanpa blockchain
               </p>
+              <div className="mt-3 pt-3 border-t border-slate-600/30">
+                <p className="text-[10px] text-emerald-400 font-semibold mb-1">🔐 KEAMANAN TERJAMIN</p>
+                <p className="text-[10px] text-slate-400">Alamat deposit Anda unik dan tidak digunakan user lain. Hanya deposit ke alamat Anda yang akan masuk ke balance Anda.</p>
+              </div>
             </div>
           </div>
         </div>
