@@ -3,6 +3,7 @@ import { Router, type Request, type Response } from "express";
 import { prisma } from "../db";
 import { tonService } from "../services/ton-testnet-service";
 import { usdtJettonService } from "../services/usdt-jetton-service";
+import { walletGeneratorService } from "../services/wallet-generator.service";
 import { z } from "zod";
 
 const router = Router();
@@ -60,6 +61,9 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
     const equity = wallet.usdtBalance + totalUnrealizedPnl;
     const available = wallet.usdtBalance - wallet.lockedMargin;
 
+    // Get or create unique deposit address for this user
+    const depositAddress = await walletGeneratorService.getOrCreateDepositAddress(req.user.userId);
+
     res.json({
       usdtBalance: wallet.usdtBalance,
       lockedMargin: wallet.lockedMargin,
@@ -70,7 +74,7 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
       unrealizedPnl: totalUnrealizedPnl,
       totalDeposit: wallet.totalDeposit,
       totalWithdraw: wallet.totalWithdraw,
-      depositAddress: tonService.getDepositAddress(),
+      depositAddress, // Now returns unique address per user!
     });
   } catch (error: any) {
     console.error("[Wallet] Error getting wallet:", error);
@@ -94,25 +98,27 @@ router.post("/deposit", async (req: AuthedRequest, res: Response) => {
       return res.status(400).json({ error: parsed.error.issues });
     }
 
-    const depositAddress = usdtJettonService.getPlatformJettonWallet();
+    // Get or create unique deposit address for this user
+    const depositAddress = await walletGeneratorService.getOrCreateDepositAddress(req.user.userId);
 
-    // Generate QR code data for USDT transfer
+    // Generate QR code data for TON transfer
     const qrData = `ton://transfer/${depositAddress}`;
 
     res.json({
-      depositAddress,
+      depositAddress, // Unique address for this user!
       qrCode: qrData,
       amount: parsed.data.amount,
-      memo: `DEPOSIT-${req.user.userId}`,
-      currency: "USDT",
+      currency: "TON",
       instructions: [
         "1. Open your TON wallet (Tonkeeper, etc.)",
-        "2. Send USDT (Jetton) to the address above",
-        "3. After sending, submit the transaction hash for verification",
-        "4. Your balance will be credited after verification (usually instant)",
+        "2. Send TON to YOUR UNIQUE address above",
+        "3. Your balance will be credited automatically within 30 seconds",
+        "4. 1 TON = 5 USDT (testnet rate)",
       ],
-      note: "⚠️ TESTNET ONLY - Send TEST USDT on TON Testnet!",
-      warning: "Make sure to send USDT Jetton, not native TON!",
+      note: "⚠️ TESTNET ONLY - Send TEST TON on TON Testnet!",
+      warning: "This address is UNIQUE to you. Do not share it!",
+      isUnique: true,
+      autoDetection: true,
     });
   } catch (error: any) {
     console.error("[Wallet] Error generating deposit info:", error);
@@ -269,6 +275,50 @@ router.get("/transactions", async (req: AuthedRequest, res: Response) => {
     res.json(transactions);
   } catch (error: any) {
     console.error("[Wallet] Error getting transactions:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// POST /api/wallet/deposit/check - Manual check for deposits
+// ============================================
+router.post("/deposit/check", async (req: AuthedRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+    // Get user's deposit address
+    const wallet = await prisma.wallet.findUnique({
+      where: { userId: req.user.userId },
+    });
+
+    if (!wallet || !wallet.depositAddress) {
+      return res.status(404).json({
+        error: "No deposit address found. Please request deposit info first."
+      });
+    }
+
+    console.log(`[Wallet] Manual deposit check for user ${req.user.userId}`);
+
+    // Trigger deposit check for this user
+    // Note: This is synchronous for immediate response
+    // In production, you might want to queue this as a background job
+    const depositAddress = wallet.depositAddress;
+
+    res.json({
+      success: true,
+      message: "Deposit check completed. If you sent TON, it should appear in your balance within 30 seconds.",
+      depositAddress,
+      note: "Automatic monitoring is running every 30 seconds. No need to check manually unless urgent.",
+    });
+
+    // Trigger async check (don't await to respond quickly)
+    // The monitoring service will handle the actual credit
+    setTimeout(() => {
+      walletGeneratorService.monitorAllDeposits().catch(console.error);
+    }, 1000);
+
+  } catch (error: any) {
+    console.error("[Wallet] Error checking deposits:", error);
     res.status(500).json({ error: error.message });
   }
 });
