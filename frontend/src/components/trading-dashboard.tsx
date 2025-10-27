@@ -252,27 +252,35 @@ export function TradingDashboard() {
 
   const candlesticks = generateCandlesticks();
 
-  // Theme colors
+  // Improved Theme colors with better contrast and modern palette
   const theme = darkMode ? {
-    bg: 'bg-[#0d0e12]',
-    bgSecondary: 'bg-[#14151b]',
-    bgTertiary: 'bg-[#1a1c24]',
-    border: 'border-[#1e1f26]',
-    borderSecondary: 'border-[#25262e]',
-    text: 'text-white',
+    bg: 'bg-gradient-to-br from-[#0a0b0f] via-[#0d0e13] to-[#0a0b0f]',
+    bgSecondary: 'bg-[#13141a]/80 backdrop-blur-xl',
+    bgTertiary: 'bg-[#1a1b23]/60',
+    bgCard: 'bg-gradient-to-br from-[#16171e]/90 to-[#1a1b23]/80',
+    border: 'border-[#1f2029]/80',
+    borderSecondary: 'border-[#2a2b36]/60',
+    borderGlow: 'border-purple-500/20',
+    text: 'text-gray-50',
     textSecondary: 'text-gray-400',
     textTertiary: 'text-gray-500',
-    hover: 'hover:bg-[#1f212a]',
+    hover: 'hover:bg-[#1f212a]/80 hover:border-purple-500/30',
+    glow: 'shadow-lg shadow-purple-500/5',
+    glowHover: 'hover:shadow-xl hover:shadow-purple-500/10',
   } : {
-    bg: 'bg-white',
-    bgSecondary: 'bg-gray-50',
-    bgTertiary: 'bg-gray-100',
-    border: 'border-gray-200',
-    borderSecondary: 'border-gray-300',
+    bg: 'bg-gradient-to-br from-gray-50 via-white to-gray-50',
+    bgSecondary: 'bg-white/80 backdrop-blur-xl',
+    bgTertiary: 'bg-gray-50/60',
+    bgCard: 'bg-gradient-to-br from-white/90 to-gray-50/80',
+    border: 'border-gray-200/80',
+    borderSecondary: 'border-gray-300/60',
+    borderGlow: 'border-purple-300/40',
     text: 'text-gray-900',
     textSecondary: 'text-gray-600',
     textTertiary: 'text-gray-500',
-    hover: 'hover:bg-gray-200',
+    hover: 'hover:bg-gray-100/80 hover:border-purple-300/50',
+    glow: 'shadow-md shadow-purple-100/20',
+    glowHover: 'hover:shadow-lg hover:shadow-purple-100/30',
   };
 
   // Get current symbol display info with icon
@@ -320,37 +328,40 @@ export function TradingDashboard() {
 
   return (
     <div className={`h-screen ${theme.bg} ${theme.text} flex overflow-hidden font-sans`}>
-      {/* Left Sidebar */}
-      <aside className={`w-16 ${theme.bgSecondary} border-r ${theme.border} flex flex-col items-center py-4`}>
-        {/* Logo */}
-        <div className={`w-11 h-11 ${darkMode ? 'bg-white' : 'bg-gray-900'} rounded-xl flex items-center justify-center cursor-pointer mb-6`}>
-          <span className={`${darkMode ? 'text-[#0d0e12]' : 'text-white'} font-bold text-xl`}>P</span>
+      {/* Left Sidebar - Improved with premium gradient */}
+      <aside className={`w-16 ${theme.bgSecondary} border-r ${theme.border} flex flex-col items-center py-4 relative`}>
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-600/5 via-transparent to-transparent pointer-events-none"></div>
+
+        {/* Logo - More premium design */}
+        <div className={`w-11 h-11 bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 rounded-xl flex items-center justify-center cursor-pointer mb-6 ${theme.glow} relative z-10`}>
+          <span className="text-white font-bold text-xl drop-shadow-lg">P</span>
         </div>
 
-        {/* Navigation Icons */}
-        <nav className="flex-1 flex flex-col space-y-3">
+        {/* Navigation Icons - Better spacing and styling */}
+        <nav className="flex-1 flex flex-col space-y-3 relative z-10">
           <NavIcon icon={<TrendingUp className="w-5 h-5" />} active tooltip="Trade" darkMode={darkMode} />
           <NavIcon icon={<Layers className="w-5 h-5" />} tooltip="Pools" darkMode={darkMode} disabled />
           <NavIcon icon={<Target className="w-5 h-5" />} tooltip="Stake" darkMode={darkMode} disabled />
           <NavIcon icon={<MoreHorizontal className="w-5 h-5" />} tooltip="More" darkMode={darkMode} disabled />
         </nav>
 
-        {/* Bottom Icons */}
-        <div className="space-y-3">
-          {/* Dark Mode Toggle */}
+        {/* Bottom Icons - Improved styling */}
+        <div className="space-y-3 relative z-10">
+          {/* Dark Mode Toggle - Better design */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`w-11 h-11 ${theme.bgTertiary} ${theme.hover} rounded-lg flex items-center justify-center cursor-pointer transition-colors`}
+            className={`w-11 h-11 ${theme.bgTertiary} ${theme.hover} rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 border ${theme.borderSecondary} ${theme.glowHover}`}
             title={darkMode ? 'Light Mode' : 'Dark Mode'}
           >
             {darkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-purple-600" />}
           </button>
-          <div className="w-11 h-11 bg-purple-600/90 rounded-lg flex items-center justify-center cursor-pointer hover:bg-purple-600">
+          <div className="w-11 h-11 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg flex items-center justify-center cursor-pointer hover:from-purple-500 hover:to-purple-600 transition-all duration-300 shadow-lg shadow-purple-600/30">
             <Activity className="w-5 h-5 text-white" />
           </div>
           <button
             onClick={logout}
-            className={`w-11 h-11 ${theme.bgTertiary} rounded-lg flex items-center justify-center text-[10px] ${theme.textTertiary} cursor-pointer ${theme.hover}`}
+            className={`w-11 h-11 ${theme.bgTertiary} rounded-lg flex items-center justify-center text-[10px] ${theme.textTertiary} cursor-pointer ${theme.hover} transition-all duration-300 border ${theme.borderSecondary}`}
             title="Logout"
           >
             ⎋
@@ -360,22 +371,25 @@ export function TradingDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header Bar */}
-        <header className={`${theme.bgSecondary} border-b ${theme.border} px-4 py-2 shrink-0`}>
-          <div className="flex items-center justify-between">
+        {/* Top Header Bar - Premium Design */}
+        <header className={`${theme.bgSecondary} border-b ${theme.border} px-6 py-3 shrink-0 relative`}>
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/3 via-transparent to-blue-600/3 pointer-events-none"></div>
+
+          <div className="flex items-center justify-between relative z-10">
             {/* Left Section */}
-            <div className="flex items-center space-x-4">
-              {/* Symbol Selector */}
-              <div className="flex items-center space-x-2">
-                <button className={`flex items-center space-x-2 ${theme.bgTertiary} ${theme.hover} px-3 py-1.5 rounded-lg border ${theme.borderSecondary} transition-colors`}>
+            <div className="flex items-center space-x-6">
+              {/* Symbol Selector - Improved card design */}
+              <div className="flex items-center space-x-3">
+                <button className={`flex items-center space-x-2.5 ${theme.bgCard} ${theme.hover} px-4 py-2 rounded-xl border ${theme.borderGlow} transition-all duration-300 ${theme.glowHover}`}>
                   <div className={getSymbolDisplay().color}>
                     {getSymbolDisplay().icon}
                   </div>
-                  <span className="font-semibold text-sm">{getSymbolDisplay().name}</span>
-                  <span className={`text-[10px] ${theme.bgTertiary} ${theme.textSecondary} px-1.5 py-0.5 rounded border ${theme.borderSecondary}`}>{leverage}x</span>
+                  <span className="font-bold text-sm">{getSymbolDisplay().name}</span>
+                  <span className={`text-[10px] bg-purple-600/20 text-purple-400 px-2 py-0.5 rounded-full font-bold border border-purple-500/30`}>{leverage}x</span>
                 </button>
-                {/* Symbol Options */}
-                <div className="flex gap-1">
+                {/* Symbol Options - Better pill design */}
+                <div className="flex gap-1.5">
                   {['ETHUSDT', 'BTCUSDT', 'TONUSDT'].map((symbol) => {
                     const symbolInfo = {
                       'ETHUSDT': { icon: <SiEthereum className="w-3 h-3" />, label: 'ETH', color: 'text-[#627EEA]' },
@@ -396,10 +410,10 @@ export function TradingDashboard() {
                       <button
                         key={symbol}
                         onClick={() => setSelectedSymbol(symbol)}
-                        className={`flex items-center gap-1 px-2 py-1 text-xs rounded transition-colors ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-all duration-300 font-medium ${
                           selectedSymbol === symbol
-                            ? 'bg-purple-600 text-white'
-                            : `${theme.bgTertiary} ${theme.textSecondary} ${theme.hover}`
+                            ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-600/30 border border-purple-500/50'
+                            : `${theme.bgTertiary} ${theme.textSecondary} ${theme.hover} border ${theme.borderSecondary}`
                         }`}
                       >
                         <span className={selectedSymbol === symbol ? 'text-white' : symbolInfo.color}>
@@ -412,60 +426,70 @@ export function TradingDashboard() {
                 </div>
               </div>
 
-              {/* Market Stats */}
-              <div className="flex items-center space-x-5">
-                <Stat label="Last price" value={currentPrice > 0 ? `$${currentPrice.toLocaleString()}` : '-'} darkMode={darkMode} />
-                <Stat
-                  label="Balance"
-                  value={`$${(portfolio?.wallet?.balance || 0).toFixed(2)}`}
-                  valueClass="text-blue-500"
-                  darkMode={darkMode}
-                />
-                <Stat
-                  label="Equity"
-                  value={`$${(portfolio?.wallet?.equity || 0).toFixed(2)}`}
-                  valueClass="text-green-500"
-                  darkMode={darkMode}
-                />
-                <Stat
-                  label="Total PnL"
-                  value={
-                    <span className={portfolio?.stats?.totalUnrealizedPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
-                      {portfolio?.stats?.totalUnrealizedPnl >= 0 ? '+' : ''}${(portfolio?.stats?.totalUnrealizedPnl || 0).toFixed(2)}
-                    </span>
-                  }
-                  darkMode={darkMode}
-                />
+              {/* Market Stats - Improved card design */}
+              <div className="flex items-center gap-6">
+                <div className={`px-4 py-2 ${theme.bgCard} rounded-lg border ${theme.borderGlow} ${theme.glow}`}>
+                  <Stat label="Last price" value={currentPrice > 0 ? `$${currentPrice.toLocaleString()}` : '-'} valueClass="text-green-400" darkMode={darkMode} />
+                </div>
+                <div className={`px-4 py-2 ${theme.bgCard} rounded-lg border ${theme.borderGlow} ${theme.glow}`}>
+                  <Stat
+                    label="Balance"
+                    value={`$${(portfolio?.wallet?.balance || 0).toFixed(2)}`}
+                    valueClass="text-blue-400"
+                    darkMode={darkMode}
+                  />
+                </div>
+                <div className={`px-4 py-2 ${theme.bgCard} rounded-lg border ${theme.borderGlow} ${theme.glow}`}>
+                  <Stat
+                    label="Equity"
+                    value={`$${(portfolio?.wallet?.equity || 0).toFixed(2)}`}
+                    valueClass="text-cyan-400"
+                    darkMode={darkMode}
+                  />
+                </div>
+                <div className={`px-4 py-2 ${theme.bgCard} rounded-lg border ${theme.borderGlow} ${theme.glow}`}>
+                  <Stat
+                    label="Total PnL"
+                    value={
+                      <span className={portfolio?.stats?.totalUnrealizedPnl >= 0 ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+                        {portfolio?.stats?.totalUnrealizedPnl >= 0 ? '+' : ''}${(portfolio?.stats?.totalUnrealizedPnl || 0).toFixed(2)}
+                      </span>
+                    }
+                    darkMode={darkMode}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Right Section */}
-            <div className="flex items-center space-x-2">
-              {/* Connect Wallet Button */}
+            {/* Right Section - Premium wallet UI */}
+            <div className="flex items-center gap-3">
+              {/* Connect Wallet Button - More attractive */}
               {!wallet ? (
                 <button
                   onClick={connectWallet}
-                  className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-all shadow-lg shadow-purple-600/30 font-medium text-sm text-white"
+                  className="flex items-center gap-2.5 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 hover:from-purple-500 hover:via-purple-400 hover:to-blue-500 px-5 py-2.5 rounded-xl transition-all duration-300 shadow-lg shadow-purple-600/40 hover:shadow-xl hover:shadow-purple-600/50 font-bold text-sm text-white relative overflow-hidden group"
                 >
-                  <Wallet className="w-4 h-4" />
-                  <span>Connect TON</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                  <Wallet className="w-4 h-4 relative z-10" />
+                  <span className="relative z-10">Connect TON</span>
                 </button>
               ) : (
                 <>
-                  <button className={`flex items-center space-x-2 ${theme.bgTertiary} ${theme.hover} px-3 py-1.5 rounded-lg border ${theme.borderSecondary} transition-colors`}>
-                    <span className="text-sm font-semibold">${(portfolio?.wallet?.available || 0).toFixed(2)}</span>
+                  <div className={`flex items-center gap-2.5 ${theme.bgCard} px-4 py-2 rounded-xl border ${theme.borderGlow} ${theme.glow}`}>
+                    <span className="text-sm font-bold text-green-400">${(portfolio?.wallet?.available || 0).toFixed(2)}</span>
                     <span className={`text-xs ${theme.textTertiary}`}>Available</span>
-                  </button>
+                  </div>
                   <button
                     onClick={disconnectWallet}
-                    className={`flex items-center space-x-2 ${theme.bgTertiary} ${theme.hover} px-3 py-1.5 rounded-lg border ${theme.borderSecondary} transition-colors`}
+                    className={`flex items-center gap-2 ${theme.bgCard} ${theme.hover} px-4 py-2 rounded-xl border ${theme.borderGlow} transition-all duration-300 ${theme.glowHover}`}
                   >
-                    <span className={`text-sm ${theme.textSecondary}`}>{tonAddress?.slice(0, 6)}...{tonAddress?.slice(-4)}</span>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className={`text-sm font-medium ${theme.text}`}>{tonAddress?.slice(0, 6)}...{tonAddress?.slice(-4)}</span>
                     <ChevronDown className={`w-4 h-4 ${theme.textTertiary}`} />
                   </button>
                 </>
               )}
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 rounded-full cursor-pointer"></div>
+              <div className="w-9 h-9 bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 rounded-full cursor-pointer shadow-lg shadow-purple-600/30 hover:shadow-xl hover:shadow-purple-600/40 transition-all duration-300 hover:scale-110"></div>
             </div>
           </div>
         </header>
@@ -663,54 +687,62 @@ export function TradingDashboard() {
             </div>
           </div>
 
-          {/* Trading Panel */}
-          <aside className={`w-96 ${theme.bgSecondary} border-l ${theme.border} flex flex-col shrink-0`}>
-            {/* Market/Limit Tabs */}
-            <div className={`flex border-b ${theme.border} shrink-0`}>
+          {/* Trading Panel - Modern card-based design */}
+          <aside className={`w-96 ${theme.bgSecondary} border-l ${theme.border} flex flex-col shrink-0 relative`}>
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-purple-600/3 via-transparent to-transparent pointer-events-none"></div>
+
+            {/* Market/Limit Tabs - Better design */}
+            <div className={`flex border-b ${theme.border} shrink-0 relative z-10 ${theme.bgCard}`}>
               {['Market', 'Limit'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                  className={`flex-1 py-3.5 text-sm font-bold transition-all duration-300 relative ${
                     activeTab === tab
-                      ? theme.text
+                      ? `${theme.text}`
                       : `${theme.textTertiary} hover:${theme.textSecondary}`
                   }`}
                 >
                   {tab}
                   {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
+                    <>
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600"></div>
+                      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-purple-600/10 to-transparent -z-10"></div>
+                    </>
                   )}
                 </button>
               ))}
             </div>
 
-            {/* Trading Form */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {/* Long/Short + Leverage */}
-              <div className="flex gap-2">
+            {/* Trading Form - Better spacing and card design */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5 relative z-10">
+              {/* Long/Short + Leverage - Premium buttons */}
+              <div className="flex gap-2.5">
                 <button
                   onClick={() => setOrderType('Long')}
-                  className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 relative overflow-hidden group ${
                     orderType === 'Long'
-                      ? 'bg-green-600 text-white shadow-lg shadow-green-600/20'
-                      : `${theme.bgTertiary} ${theme.textSecondary} ${theme.hover} hover:text-white`
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-600/30 border border-green-500/50'
+                      : `${theme.bgCard} ${theme.textSecondary} ${theme.hover} hover:text-white border ${theme.borderSecondary}`
                   }`}
                 >
-                  Long
+                  {orderType === 'Long' && <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>}
+                  <span className="relative z-10">Long</span>
                 </button>
                 <button
                   onClick={() => setOrderType('Short')}
-                  className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 relative overflow-hidden group ${
                     orderType === 'Short'
-                      ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
-                      : `${theme.bgTertiary} ${theme.textSecondary} ${theme.hover} hover:text-white`
+                      ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-600/30 border border-red-500/50'
+                      : `${theme.bgCard} ${theme.textSecondary} ${theme.hover} hover:text-white border ${theme.borderSecondary}`
                   }`}
                 >
-                  Short
+                  {orderType === 'Short' && <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>}
+                  <span className="relative z-10">Short</span>
                 </button>
                 <div className="relative group">
-                  <button className={`px-4 py-2.5 ${theme.bgTertiary} ${theme.hover} rounded-lg font-medium text-sm transition-colors border ${theme.borderSecondary}`}>
+                  <button className={`px-5 py-3 ${theme.bgCard} ${theme.hover} rounded-xl font-bold text-sm transition-all duration-300 border ${theme.borderGlow} ${theme.glowHover}`}>
                     {leverage}x
                   </button>
                   {/* Leverage selector dropdown */}
@@ -728,20 +760,20 @@ export function TradingDashboard() {
                 </div>
               </div>
 
-              {/* Available Balance */}
-              <div className="flex items-center justify-between text-sm">
+              {/* Available Balance - Better card */}
+              <div className={`flex items-center justify-between text-sm ${theme.bgCard} px-4 py-3 rounded-xl border ${theme.borderGlow} ${theme.glow}`}>
                 <span className={theme.textSecondary}>Available to trade</span>
-                <span className="font-semibold">${availableBalance.toFixed(2)} USD</span>
+                <span className="font-bold text-blue-400">${availableBalance.toFixed(2)}</span>
               </div>
 
-              {/* Testnet Faucet Button */}
+              {/* Testnet Faucet Button - More attractive */}
               <button
                 onClick={handleFaucetClaim}
                 disabled={!canClaim || faucetLoading}
-                className={`w-full py-2.5 rounded-lg font-medium text-sm transition-all border ${
+                className={`w-full py-3 rounded-xl font-bold text-sm transition-all duration-300 border relative overflow-hidden group ${
                   canClaim && !faucetLoading
-                    ? `${theme.bgTertiary} border-green-500/50 ${theme.textSecondary} hover:bg-green-500/20 hover:text-green-400 hover:border-green-500`
-                    : `${theme.bgTertiary} ${theme.borderSecondary} ${theme.textTertiary} cursor-not-allowed opacity-60`
+                    ? `${theme.bgCard} border-green-500/50 ${theme.textSecondary} hover:bg-green-500/20 hover:text-green-400 hover:border-green-500 shadow-lg shadow-green-500/10`
+                    : `${theme.bgCard} ${theme.borderSecondary} ${theme.textTertiary} cursor-not-allowed opacity-50`
                 }`}
               >
                 {faucetLoading ? (
@@ -760,30 +792,35 @@ export function TradingDashboard() {
                 )}
               </button>
 
-              {/* Order Size */}
+              {/* Order Size - Better input design */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className={`text-sm ${theme.textSecondary}`}>Enter size</label>
-                  <select className={`${theme.bgTertiary} border ${theme.borderSecondary} px-2.5 py-1 rounded text-sm ${theme.text} focus:outline-none focus:border-purple-600 cursor-pointer`}>
+                <div className="flex items-center justify-between mb-3">
+                  <label className={`text-sm font-semibold ${theme.textSecondary}`}>Enter size</label>
+                  <select className={`${theme.bgCard} border ${theme.borderGlow} px-3 py-1.5 rounded-lg text-xs ${theme.text} font-bold focus:outline-none focus:border-purple-600 cursor-pointer transition-all duration-300`}>
                     <option>USD</option>
                     <option>MON</option>
                   </select>
                 </div>
-                <input
-                  type="number"
-                  value={orderSize}
-                  onChange={(e) => {
-                    setOrderSize(e.target.value);
-                    // Update percentage based on manual input
-                    if (availableBalance > 0 && e.target.value) {
-                      const size = parseFloat(e.target.value);
-                      const pct = Math.min(100, (size / leverage / availableBalance) * 100);
-                      setPercentage(Math.round(pct));
-                    }
-                  }}
-                  placeholder="0"
-                  className={`w-full ${theme.bgTertiary} border ${theme.borderSecondary} rounded-lg px-4 py-3 ${theme.text} ${darkMode ? 'placeholder-gray-600' : 'placeholder-gray-400'} focus:outline-none focus:border-purple-600 transition-colors`}
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={orderSize}
+                    onChange={(e) => {
+                      setOrderSize(e.target.value);
+                      // Update percentage based on manual input
+                      if (availableBalance > 0 && e.target.value) {
+                        const size = parseFloat(e.target.value);
+                        const pct = Math.min(100, (size / leverage / availableBalance) * 100);
+                        setPercentage(Math.round(pct));
+                      }
+                    }}
+                    placeholder="0.00"
+                    className={`w-full ${theme.bgCard} border ${theme.borderGlow} rounded-xl px-5 py-4 ${theme.text} text-lg font-bold ${darkMode ? 'placeholder-gray-700' : 'placeholder-gray-400'} focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300`}
+                  />
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">
+                    USD
+                  </div>
+                </div>
               </div>
 
               {/* Percentage Slider */}
@@ -834,17 +871,34 @@ export function TradingDashboard() {
                 <span>Add Take Profit / Stop Loss</span>
               </button>
 
-              {/* Buy/Sell Button */}
+              {/* Buy/Sell Button - Premium design with glow effect */}
               <button
                 onClick={handleOpenPosition}
                 disabled={orderLoading || !orderSize || parseFloat(orderSize) <= 0}
-                className={`w-full py-3.5 rounded-lg font-semibold text-white transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-full py-4 rounded-xl font-bold text-white text-base transition-all duration-300 shadow-xl disabled:opacity-40 disabled:cursor-not-allowed relative overflow-hidden group ${
                   orderType === 'Long'
-                    ? 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
-                    : 'bg-red-600 hover:bg-red-700 shadow-red-600/30'
+                    ? 'bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-500 hover:via-emerald-500 hover:to-green-500 shadow-green-600/40 hover:shadow-green-600/60 border border-green-500/50'
+                    : 'bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:via-rose-500 hover:to-red-500 shadow-red-600/40 hover:shadow-red-600/60 border border-red-500/50'
                 }`}
               >
-                {orderLoading ? 'Opening...' : (orderType === 'Long' ? 'Buy / Long' : 'Sell / Short')}
+                {!orderLoading && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                )}
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {orderLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
+                      <span>Opening Position...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{orderType === 'Long' ? 'Buy / Long' : 'Sell / Short'}</span>
+                      {orderSize && parseFloat(orderSize) > 0 && (
+                        <span className="text-white/90 font-normal">({leverage}x)</span>
+                      )}
+                    </>
+                  )}
+                </span>
               </button>
 
               {/* Order Details */}
