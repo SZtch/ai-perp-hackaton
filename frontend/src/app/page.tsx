@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTonWallet } from '@tonconnect/ui-react';
 import { useAuth } from '@/providers/auth-provider';
 import { WalletConnect } from '@/components/wallet-connect';
-import { TradingDashboard } from '@/components/trading-dashboard';
+import { TradingDashboard } from '@/components/trading-dashboard/index';
 
 export default function Home() {
   const wallet = useTonWallet();
